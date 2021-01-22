@@ -29,16 +29,16 @@ module.exports = {
       if (warn) {
         message.delete();
         var warnCount = client.setMemberVar('warn', client.getMemberVar('warn', message.member) + 1, message.member);
-        if(warnCount >= 10 && message.member.bannable) {
+        if (warnCount >= 10 && message.member.bannable) {
           message.member.ban({
-            days: 7,
-            reason: 'Too many warns'
-          })
-          .then(m => message.reply('Non puoi inviare link invito! Hai raggiunto il limite di avvertimenti e sei stato bannato dal server!'))
-          .catch(err => {
-            console.error(err);
-            message.reply('Non puoi inviare link invito! Hai raggiunto il limite di avvertimenti ma non sono riuscito a bannarti dal server :(');
-          });
+              days: 7,
+              reason: 'Too many warns'
+            })
+            .then(m => message.reply('Non puoi inviare link invito! Hai raggiunto il limite di avvertimenti e sei stato bannato dal server!'))
+            .catch(err => {
+              console.error(err);
+              message.reply('Non puoi inviare link invito! Hai raggiunto il limite di avvertimenti ma non sono riuscito a bannarti dal server :(');
+            });
           return;
         }
         return message.reply('Non puoi inviare link invito!');

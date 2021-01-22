@@ -6,12 +6,12 @@ module.exports = {
   description: 'This is beautiful!',
   async execute(message, args, client, db) {
     try {
-      let user = await client.findMember(message, args.join(' '), true, client)
-        .catch(err => console.error(err));
-      if (user === null) return;
-      if (!user) return message.channel.send('Non ho trovato questo utente!');
+      let member = await client.findMember(message, args.join(' '), true, client);
+      if (member === null) return;
+      if (!member) return message.channel.send('Non ho trovato questo utente!')
+      .catch(console.error);
       message.channel.startTyping();
-      if (user.user) user = user.user;
+      var user = member.user || member;
       let avatar = user.displayAvatarURL({
         format: 'png',
         dynamic: false,
@@ -20,7 +20,8 @@ module.exports = {
       const buffer = await Canvas.beautiful(avatar);
       const att = new MessageAttachment(buffer, 'beautiful.png');
       message.channel.stopTyping(true);
-      await message.channel.send(att);
+      await message.channel.send(att)
+      .catch(console.error);
       message.channel.stopTyping(true);
     } catch (err) {
       console.log(err, message);

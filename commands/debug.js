@@ -16,13 +16,13 @@ module.exports = {
       switch (args[0].toLowerCase()) {
         case "backup":
           const getDirectories = source =>
-          readdirSync(source, { withFileTypes: true })
-          .filter(dirent => dirent.isDirectory())
-          .map(dirent => dirent.name)
-          .filter(dirent => !dirent.startsWith('.'))
-          .filter(dirent => dirent != 'node_modules');
+            readdirSync(source, { withFileTypes: true })
+            .filter(dirent => dirent.isDirectory())
+            .map(dirent => dirent.name)
+            .filter(dirent => !dirent.startsWith('.'))
+            .filter(dirent => dirent != 'node_modules');
           var attachments = [];
-          for(let dir of getDirectories('./')) {
+          for (let dir of getDirectories('./')) {
             let zip = new Zip();
             zip.addLocalFolder(`./${dir}`);
             zip.writeZip(`./config/${dir}.zip`);
@@ -30,8 +30,8 @@ module.exports = {
             attachments.push(att);
           }
           await message.channel.send(`Backup completed! Took **${Date.now() - date}ms**`, attachments);
-          for(let dir of getDirectories('./')) fs.unlink(`./config/${dir}.zip`, err => {
-            if(err) throw err;
+          for (let dir of getDirectories('./')) fs.unlink(`./config/${dir}.zip`, err => {
+            if (err) throw err;
           });
           break;
         case "fetch":
@@ -97,7 +97,8 @@ module.exports = {
           message.delete();
           args.shift();
           let channel = client.channels.cache.find(c => c.toString() == args[0]) || client.channels.cache.find(c => c.id == args[0]) || client.channels.cache.find(c => c.name == args[0]);
-          if(!channel) channel = message.channel; else args.shift();
+          if (!channel) channel = message.channel;
+          else args.shift();
           channel.send(args.join(' '));
           break;
         case "ram":

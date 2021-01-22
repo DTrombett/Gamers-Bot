@@ -36,11 +36,18 @@ module.exports = {
           commands = new Collection();
         }
       }
-      var sent = await message.channel.send(embeds[0]);
-      if (embeds.length == 1) return;
+      var sent = await message.channel.send(embeds[0])
+        .catch(console.error, message);
+      if (embeds.length == 1 || !sent) return;
+      var error;
       sent.react('◀️')
-      .then(() => sent.react('▶️'))
-      .then(() => sent.react('❌'));
+        .then(() => sent.react('▶️'))
+        .then(() => sent.react('❌'))
+        .catch(err => {
+          console.error(err);
+          error = true;
+        });
+      if (error) return;
       var i = 0;
       const filter = (reaction, user) => {
         return ['❌', '▶️', '◀️'].includes(reaction.emoji.name) && user.id === message.author.id;
@@ -53,13 +60,15 @@ module.exports = {
             if (i - 1 < 0) return;
             i -= 1;
             embed = embeds[i];
-            sent.edit(embed);
+            sent.edit(embed)
+              .catch(console.error);
             break;
           case '▶️':
             if (i + 1 >= embeds.length) return;
             i += 1;
             embed = embeds[i];
-            sent.edit(embed);
+            sent.edit(embed)
+              .catch(console.error);
             break;
           case '❌':
             collector.stop('Stopped by the user');
@@ -67,16 +76,19 @@ module.exports = {
           default:
             return;
         }
-        return reaction.users.remove(user.id);
+        return reaction.users.remove(user.id)
+          .catch(console.error);
       });
       collector.on('end', (collected, reason) => {
         if (reason == 'Stopped by the user') {
           const stopped = helpEmbed('', client)
-          .setFooter('Made by DTrombett')
-          .setDescription('Hai chiuso la pagina di aiuto!');
-          sent.edit(stopped);
+            .setFooter('Made by DTrombett')
+            .setDescription('Hai chiuso la pagina di aiuto!');
+          sent.edit(stopped)
+            .catch(console.error);
         }
-        return sent.reactions.removeAll();
+        return sent.reactions.removeAll()
+          .catch(console.error);
       });
     } catch (err) {
       console.log(err, message);

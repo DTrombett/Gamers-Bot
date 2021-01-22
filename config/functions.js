@@ -24,7 +24,7 @@ module.exports = function(client, db) {
         client.error += 1;
       });
   };
-  
+
   var emb = new MessageEmbed()
     .setAuthor(`Shard 0`, client.customAvatar, client.customAvatar)
     .setTitle('STATUS')
@@ -34,27 +34,42 @@ module.exports = function(client, db) {
     .setColor('GREEN')
     .addField('Ready', 'Bot is online!');
   client.postStatus([emb]);
-  
+
   schedule.scheduleJob('0 0 * * *', () => {
     let date = Date.now();
     const channel = client.channels.cache.get('796671118601093171');
     var zip = new Zip();
     const getDirectories = source =>
-    readdirSync(source, { withFileTypes: true })
-    .filter(dirent => dirent.isDirectory())
-    .map(dirent => dirent.name)
-    .filter(dirent => !dirent.startsWith('.'))
-    .filter(dirent => dirent != 'node_modules');
-    for(let dir of getDirectories('./')) zip.addLocalFolder(`./${dir}`);
-    zip.writeZip('./config/backup.zip');
-    const att = new MessageAttachment('./config/backup.zip', `backup_${format(date, 'dd-mm-yy')}.zip`);
-    channel.send(`Daily Backup!`, att).then(msg => {
-      unlink('./config/backup.zip', (err) => {
-        if (err) throw err;
-      });
+      readdirSync(source, { withFileTypes: true })
+      .filter(dirent => dirent.isDirectory())
+      .map(dirent => dirent.name)
+      .filter(dirent => !dirent.startsWith('.'))
+      .filter(dirent => dirent != 'node_modules');
+    var attachments = [];
+    for (let dir of getDirectories('./')) {
+      let zip = new Zip();
+      zip.addLocalFolder(`./${dir}`);
+      zip.writeZip(`./config/${dir}.zip`);
+      let att = new MessageAttachment(`./config/${dir}.zip`, dir + '.zip');
+      attachments.push(att);
+    }
+    await channel.send(`Backup completed! Took **${Date.now() - date}ms**`, attachments);
+    for (let dir of getDirectories('./')) fs.unlink(`./config/${dir}.zip`, err => {
+      if (err) throw err;
     });
   });
-  
+
+  String.prototype.decodeHTML = function() {
+    var map = { "gt": ">" /* , … */ };
+    return this.replace(/&(#(?:x[0-9a-f]+|\d+)|[a-z]+);?/gi, function($0, $1) {
+      if ($1[0] === "#") {
+        return String.fromCharCode($1[1].toLowerCase() === "x" ? parseInt($1.substr(2), 16) : parseInt($1.substr(1), 10));
+      } else {
+        return map.hasOwnProperty($1) ? map[$1] : $0;
+      }
+    });
+  };
+
   client.getServerLog = function(identifier) {
     if (!identifier) return;
     var channels = identifier.guild.channels.cache.array();
@@ -81,7 +96,7 @@ module.exports = function(client, db) {
       .setTimestamp();
     return embed;
   };
-  
+
   require('./variables.js')(client, db);
   require('./asyncf.js')(client, db);
 };
