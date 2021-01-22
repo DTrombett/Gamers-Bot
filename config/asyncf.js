@@ -7,7 +7,7 @@ normalize = text => {
   return normal(text).toLowerCase().split(/ +/).join(' ').replace(regex, ' ').replace(regex1, '').split('|').join('');
 };
 compareFunction = (a, b) => {
-  if([normalize(a.user.tag), normalize(b.user.tag)].sort()[0] == normalize(a.user.tag)) return -1;
+  if ([normalize(a.user.tag), normalize(b.user.tag)].sort()[0] == normalize(a.user.tag)) return -1;
   return 1;
 };
 
