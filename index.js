@@ -163,6 +163,6 @@ app.use(function(req, res, next) {
   res.sendFile(`server${req.url}`, { root: __dirname });
 });
 app.listen(port, () => console.log(`Listening at http://localhost:${port}`));
-client.login(process.env.TOKEN);
+client.login(process.env.DISCORD_TOKEN);
 
 console.log('Completed starting process! Successfully connecting... Check debug info for informations.');

@@ -2,8 +2,9 @@ const fetch = require('node-fetch');
 const { MessageAttachment, MessageEmbed } = require('discord.js');
 const { readdirSync, readFile } = require('fs');
 const canvacord = require('canvacord');
-var Zip = require("adm-zip");
+var Zip = require('adm-zip');
 const format = require('dateformat');
+const ms = require('ms');
 
 module.exports = {
   name: 'debug',
@@ -14,7 +15,10 @@ module.exports = {
       var date = Date.now();
       message.delete();
       switch (args[0].toLowerCase()) {
-        case "backup":
+        case 'uptime':
+          return message.channel.send(ms(client.uptime));
+          break;
+        case 'backup':
           const getDirectories = source =>
             readdirSync(source, { withFileTypes: true })
             .filter(dirent => dirent.isDirectory())
@@ -34,7 +38,7 @@ module.exports = {
             if (err) throw err;
           });
           break;
-        case "fetch":
+        case 'fetch':
           message.delete();
           var text;
           var json;
@@ -71,7 +75,7 @@ module.exports = {
             return message.channel.send('Failed to parse!');
           });
           break;
-        case "sendfile":
+        case 'sendfile':
           const file = args[1];
           message.channel.send({
               files: [{
@@ -81,10 +85,10 @@ module.exports = {
             })
             .catch(err => {
               console.log(err);
-              message.channel.send("File not found!");
+              message.channel.send('File not found!');
             });
           break;
-        case "sendtextfile":
+        case 'sendtextfile':
           readFile(args[1], 'utf8', function(err, data) {
             if (err) {
               message.channel.send('File not found');
@@ -93,7 +97,7 @@ module.exports = {
             message.channel.send('\`\`\`js\n' + data + '\`\`\`');
           });
           break;
-        case "sendmessage":
+        case 'sendmessage':
           message.delete();
           args.shift();
           let channel = client.channels.cache.find(c => c.toString() == args[0]) || client.channels.cache.find(c => c.id == args[0]) || client.channels.cache.find(c => c.name == args[0]);
@@ -101,7 +105,7 @@ module.exports = {
           else args.shift();
           channel.send(args.join(' '));
           break;
-        case "ram":
+        case 'ram':
           let used = process.memoryUsage().heapUsed / 1024 / 1024;
           used = Math.round(used * 100) / 100 + 'MB'
           message.channel.send(used);
