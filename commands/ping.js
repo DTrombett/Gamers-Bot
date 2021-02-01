@@ -1,12 +1,19 @@
 module.exports = {
   name: 'ping',
   description: "Pong!",
-  execute(message, args, client, db) {
+  help: 'Pong!',
+  usage: ' ',
+  aliases: ['latency'],
+  examples: [''],
+  execute: async function(message, args, client, prefix) {
     try {
-      message.channel.send(`🏓 Pong! Latency: **${Math.round(Date.now() - message.createdTimestamp)}ms** API: **${client.ws.ping}ms**`)
+      var sent = await message.channel.send(`🏓 Pong!`)
+        .catch(console.error);
+      if (!sent) return;
+      return sent.edit(`🏓 Pong! Latency: **${Math.floor(sent.createdTimestamp - message.createdTimestamp)}ms** API: **${client.ws.ping}ms**`)
         .catch(console.error);
     } catch (err) {
-      console.log(err, message);
+      client.error(err, message);
     }
   }
 };

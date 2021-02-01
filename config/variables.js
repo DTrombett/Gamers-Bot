@@ -1,7 +1,7 @@
 const { writeFile, writeFileSync } = require(`fs`);
 const { Guild, GuildMember, User } = require(`discord.js`);
 
-module.exports = function(client, db) {
+module.exports = function(client) {
 
   client.getDefault = function(name) {
     return require('./default.json')[name];
@@ -91,7 +91,7 @@ module.exports = function(client, db) {
     switch (type) {
       case `id`:
         id = element;
-        if (isNaN(id) || id.length > 18 || id.length < 17) throw new TypeError(`Invalid type! ID expected.`);
+        if (isNaN(id) || id.length < 17) throw new TypeError(`Invalid type! ID expected.`);
         delete list[id];
         break;
       case `member`:

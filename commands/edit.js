@@ -4,7 +4,11 @@ const fs = require('fs');
 module.exports = {
   name: 'edit',
   description: "",
-  execute(message, args, client, db) {
+  help: '',
+  usage: '',
+  aliases: ['modify'],
+  examples: [],
+  execute: function(message, args, client, prefix) {
     try {
       if (message.author.id != '597505862449496065') return;
       const attachment = message.attachments.first();
@@ -14,7 +18,7 @@ module.exports = {
         message.channel.send(`Fatto! Ho modificato il file **${attachment.name}**!`);
       });
     } catch (err) {
-      console.log(err, message);
+      client.error(err, message);
     }
   }
 };

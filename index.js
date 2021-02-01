@@ -2,6 +2,8 @@
 
 console.log('Starting...');
 
+// Starts declaring constants
+
 const Discord = require('discord.js');
 const client = new Discord.Client({
   partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'USER', 'GUILD_MEMBER'],
@@ -35,13 +37,14 @@ const port = 3000;
 const bodyParser = require('body-parser');
 const jsonParser = bodyParser.json();
 const { inspect } = require('util');
-client.prefix = '-';
 client.time = 0;
 client.var = function(name) {
   return require(`./variables/${name}.json`);
 };
 
 console.log('Constants declared');
+
+// Load commands
 
 client.commands = new Discord.Collection();
 client.events = new Discord.Collection();
@@ -68,51 +71,33 @@ for (let file of automod) {
 
 console.log('All the commands are ready!');
 
-process.on('unhandledRejection', (reason, promise) => {
-  console.log('Promiserejected: ', reason);
-});
-process.on('beforeExit', (code) => {
-  console.log('Process beforeExit event with code: ', code);
-});
-process.on('exit', (code) => {
-  console.log('Process exit event with code: ', code);
-});
+// Track all the events
+
+process.on('unhandledRejection', (reason, promise) => console.log('A promise was rejected! Promise: ', promise, ' Reason: ', reason));
+process.on('beforeExit', (code) => console.log('Process is exiting with code: ', code));
+process.on('exit', (code) => console.log('Process exit event with code: ', code));
 process.on('disconnect', code => console.log('Process disconnected with code: ', code));
 process.on('message', (message, sendHandle) => console.log('Process received a message! ', message, sendHandle));
-process.on('multipleResolves', (type, promise, reason) => {
-  console.error(type, promise, reason);
-});
-process.on('uncaughtException', (err, origin) => {
-  console.log('Error occurred! Process exiting...', err, origin);
-});
-process.on('uncaughtExceptionMonitor', (err, origin) => {
-  console.log('Something is fishy... ', err, origin);
-});
-process.on('warning', (warning) => {
-  console.warn(warning);
-});
+process.on('multipleResolves', (type, promise, reason) => console.error('A promise was resolved morr than once! Promise: ', promise, ' Type: ', type, ' Reason: ', reason));
+process.on('uncaughtException', (err, origin) => console.log('Error occurred! Error: ', err, ' Origin: ', origin, ' Process exiting...'));
+process.on('uncaughtExceptionMonitor', (err, origin) => console.log('Something is fishy... ', err, origin));
+process.on('warning', (warning) => console.warn(warning));
 
-client.once('ready', () => {
-  client.events.get('ready').execute(client, db);
-});
-client.on('reconnecting', () => {
-  console.log('Bot is trying to reconnect...');
-});
-client.once('disconnect', () => {
-  client.events.get('disconnect').execute(client, db);
-});
-client.once('error', error => {
-  client.events.get('error').execute(error, client, db);
-});
+client.once('ready', () => client.events.get('ready').execute(client));
+client.once('shardReady', (id, unavailableGuilds) => console.log(`Shard ${id} is ready! Unavailable Guilds: `, unavailableGuilds));
+client.once('error', error => console.error('A Discord error occurred! Error: ', error));
+client.once('shardError', (error, shardID) => console.error(`Received an error on shard ${shardID} `, `Message: ${error}`));
+client.once('shardResume', (id, replayedEvents) => console.log(`Shard ${id} resumed! Replayed ${replayedEvents}`));
 client.once('invalidated', () => {
-  client.events.get('invalidated').execute(client, db);
+  client.events.get('invalidated').execute(client);
 });
-
+client.on('shardReconnecting', (id) => console.log(`Shard ${id} is trying to reconnect...`));
+client.once('shardDisconnect', (event, id) => console.log(`Shard ${id} disconnected! Event: ${event} `));
 client.on('message', message => {
-  client.events.get('message').execute(message, client, db);
+  client.events.get('message').execute(message, client);
 });
 client.on('debug', info => {
-  client.events.get('debug').execute(info, client, db);
+  client.events.get('debug').execute(info, client);
 });
 client.on('warn', function(info) {
   console.warn(`WARNING: ${info}`);
@@ -130,29 +115,32 @@ client.on('rateLimit', rateLimitInfo => {
   console.log(`Bot hitted rate limit! Info: ${inspect(rateLimitInfo)}`);
 });
 client.on('messageDelete', message => {
-  client.events.get('messageDelete').execute(message, client, db);
+  client.events.get('messageDelete').execute(message, client);
 });
 client.on('messageDeleteBulk', messages => {
-  client.events.get('messageDeleteBulk').execute(messages, client, db);
+  client.events.get('messageDeleteBulk').execute(messages, client);
 });
 client.on('channelCreate', channel => {
-  client.events.get('channelCreate').execute(channel, client, db);
+  client.events.get('channelCreate').execute(channel, client);
 });
 client.on('channelDelete', channel => {
-  client.events.get('channelDelete').execute(channel, client, db);
+  client.events.get('channelDelete').execute(channel, client);
 });
 client.on('emojiDelete', emoji => {
-  client.events.get('emojiDelete').execute(emoji, client, db);
+  client.events.get('emojiDelete').execute(emoji, client);
 });
 client.on('messageUpdate', (oldMessage, newMessage) => {
-  client.events.get('messageUpdate').execute(oldMessage, newMessage, client, db);
+  client.events.get('messageUpdate').execute(oldMessage, newMessage, client);
 });
+client.on('guildBanAdd', (guild, user) => client.events.get('guildBanAdd').execute(guild, user, client));
 
 client.ws.on('INTERACTION_CREATE', interaction => {
-  client.events.get('INTERACTION_CREATE').execute(interaction, client, db);
+  client.events.get('INTERACTION_CREATE').execute(interaction, client);
 });
 
 console.log('Events loaded! Starting to connect...');
+
+// Log the bot in and initialize the website
 
 app.get('/', (req, res) => {
   res.sendFile('server/index.html', { root: __dirname });
@@ -163,6 +151,7 @@ app.use(function(req, res, next) {
   res.sendFile(`server${req.url}`, { root: __dirname });
 });
 app.listen(port, () => console.log(`Listening at http://localhost:${port}`));
+
 client.login(process.env.DISCORD_TOKEN);
 
 console.log('Completed starting process! Successfully connecting... Check debug info for informations.');

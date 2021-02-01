@@ -2,19 +2,27 @@ const { escapeMarkdown } = require('discord.js');
 
 module.exports = {
   name: 'resetwarn',
-  description: '',
-  async execute(message, args, client, db) {
+  description: 'Reimposta gli avvertimenti dei membri',
+  help: 'Usa questo comando se vuoi resettare gli avvertimenti di un membro del server o di tutti i membri.',
+  usage: ' (@utente | username | ID )',
+  aliases: ['reset-warn', 'reset'],
+  examples: ['', ' @DTrombett#2000', ' Trombett', ' 597505862449496065'],
+  time: 5000,
+  execute: async function(message, args, client, prefix) {
     try {
-      if (!message.guild.available) return message.channel.send('Si è verificato un errore!');
-      let perms = message.member.permissions;
-      if (!perms.has('ADMINISTRATOR')) return message.channel.send('Non hai abbastanza permessi ler eseguire questa azione!')
+      if (!message.guild.available) return client.error('Guild is unavailable.', message) && message.channel.send('Si è verificato un errore!')
+        .catch(console.error);
+      if (!message.member.hasPermission('ADMINISTRATOR')) return message.channel.send('Non hai abbastanza permessi ler eseguire questa azione!')
         .catch(console.error);
       if (!args[0]) {
         var sent = await message.channel.send('Sei sicuro di voler cancellare gli avvertimenti di tutti i membri del server? **NOTA: Questa azione non può essere annulata!**')
           .catch(console.error);
         if (!sent) return;
-        sent.react('✅')
-          .then(() => sent.react('❎'));
+        let r = await sent.react('✅')
+          .then(() => sent.react('❎'))
+          .catch(console.error);
+        if (!r) return sent.edit('Non ho abbastanza permessi per aggiungere reazioni al messaggio!')
+          .catch(console.error);
         const filter = (reaction, user) => {
           return ['✅', '❎'].includes(reaction.emoji.name) && user.id === message.author.id;
         };
@@ -23,7 +31,7 @@ module.exports = {
             time: 60000,
             errors: ['time']
           })
-          .then(collected => {
+          .then(async collected => {
             const reaction = collected.first();
             if (reaction.emoji.name === '✅') {
               client.resetVar('warn', 'id', message.guild.id);
@@ -32,30 +40,38 @@ module.exports = {
               return sent.delete()
                 .catch(console.error);
             } else {
-              message.channel.send('Ok! Comando cancellato.')
+              let sent2 = await message.channel.send('Ok! Comando cancellato.')
+                .catch(console.error);
+              if (sent2) return sent2.delete({ timeout: 10000 })
                 .catch(console.error);
             }
           })
-          .catch(err => {
-            console.log(err);
-            message.channel.send('Non hai scelto nessuna risposta! Comando cancellato.')
+          .catch(async err => {
+            console.error(err);
+            let sent2 = message.channel.send('Non hai scelto nessuna risposta! Comando cancellato.')
               .catch(console.error);
             message.delete()
               .catch(console.error);
             sent.delete()
               .catch(console.error);
+            sent.delete({ timeout: 10000 })
+              .catch(console.error);
           });
         return;
       }
-      var member = await client.findMember(message, args.join(' '), true);
-      if (member === null) return;
-      if (!member) return message.channel.send('Non ho trovato questo membro!')
+      var target = await client.findMember(message, args.join(' '), true);
+      if (target === null) return;
+      if (!target) return message.channel.send('Non ho trovato questo membro!')
         .catch(console.error);
+      if (target.user.id == message.guild.ownerID || target.hasPermission('ADMINISTRATOR') || target.roles.highest.position >= message.member.roles.highest.position && message.guild.ownerID != message.author.id) return message.channel.send("Non hai abbastanza permessi per eseguire questa azione!")
+        .catch(console.error);
+      if (!member.user.tag) return client.error('Failed to get member tag.', message) && message.channel.send('Si è verificato un errore!')
+        .catch(console.error)
       client.resetVar('warn', 'member', member);
       return message.channel.send(`Fatto! Ho resettato tutti gli avvertimenti di **${escapeMarkdown(member.user.tag)}**.`)
         .catch(console.error);
     } catch (err) {
-      console.log(err, message);
+      client.error(err, message);
     }
   }
 };

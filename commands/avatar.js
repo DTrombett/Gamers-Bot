@@ -1,11 +1,18 @@
 const { MessageEmbed } = require('discord.js');
 
 module.exports = {
-  name: "avatar",
+  name: 'avatar',
   description: "Guarda l'avatar di un utente!",
-  async execute(message, args, client, db) {
+  help: 'Usa questo comando per visualizzare l\'avatar di qualsiasi utente tramite l\'ID, username o menzione!',
+  usage: ' (@utente | username | ID )',
+  aliases: ['pfp'],
+  examples: ['', ' @DTrombett#2000', ' Trombett', ' 597505862449496065'],
+  time: 2000,
+  execute: async function(message, args, client, prefix) {
     try {
-      if (!message.author.tag) return message.channel.send('Si è verificato un errore!')
+      if (!message.author.tag) return client.error('Author tag undefined.', message) && message.channel.send('Si è verificato un errore!')
+        .catch(console.error);
+      if (!message.guild.available) return client.error('Guild unavailable.', message) && message.channel.send('Si è verificato un errore!')
         .catch(console.error);
       var date = message.createdTimestamp;
       var member = await client.findMember(message, args.join(' '), true, client);
@@ -18,15 +25,9 @@ module.exports = {
         dynamic: true,
         size: 4096
       });
-      var color = member.displayHexColor;
-      if (!color) {
-        let guild = message.guild;
-        if (!guild || !guild.available) return message.channel.send('Si è verificato un errore!')
-          .catch(console.error);
-        color = guild.roles.highest.color;
-      }
+      var color = member.displayHexColor || message.guild.roles.highest.color;
       let name = member.displayName || user.username;
-      if (!name) return message.channel.send('Non trovato nessun utente!')
+      if (!name || !color || !avatar) return client.error('Content failed to load.', message) && message.channel.send('Si è verificato un errore!')
         .catch(console.error);
       const avatarEmbed = new MessageEmbed()
         .setColor(color)
@@ -37,7 +38,7 @@ module.exports = {
       return message.channel.send(avatarEmbed)
         .catch(console.error);
     } catch (err) {
-      console.log(err, nessage);
+      client.error(err, message);
     }
   }
-};
+}

@@ -3,16 +3,14 @@ const { inspect } = require('util');
 const format = require('dateformat');
 const fs = require('fs');
 
-format.i18n = {
-  dayNames: ["Dom", "Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"],
-  monthNames: ["Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic", "Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"],
-  timeNames: ["a", "p", "am", "pm", "A", "P", "AM", "PM"],
-};
-
 module.exports = {
   name: 'eval',
-  description: '',
-  async execute(message, args, client, db) {
+  
+  help: '',
+  usage: '',
+  aliases: [],
+  examples: [],
+  execute: async function(message, args, client, prefix) {
     if (message.author.id != '597505862449496065') return;
     try {
       message.delete();

@@ -8,8 +8,12 @@ const ms = require('ms');
 
 module.exports = {
   name: 'debug',
-  description: '',
-  async execute(message, args, client, db) {
+
+  help: '',
+  usage: '',
+  aliases: ['try', 'test'],
+  examples: [],
+  execute: async function(message, args, client, prefix) {
     try {
       if (message.author.id != '597505862449496065') return;
       var date = Date.now();
@@ -24,7 +28,7 @@ module.exports = {
             .filter(dirent => dirent.isDirectory())
             .map(dirent => dirent.name)
             .filter(dirent => !dirent.startsWith('.'))
-            .filter(dirent => dirent != 'node_modules');
+            .filter(dirent => dirent != 'node_modules' && dirent != 'variables');
           var attachments = [];
           for (let dir of getDirectories('./')) {
             let zip = new Zip();
@@ -110,11 +114,25 @@ module.exports = {
           used = Math.round(used * 100) / 100 + 'MB'
           message.channel.send(used);
           break;
+        case 'man':
+          var man = client.setVar('man', !client.getVar('man'));
+          if(man) await client.user.setPresence({
+            status: 'idle',
+            activity: {
+              name: 'Maintenance!',
+              type: 'WATCHING',
+            }
+          }); else await client.user.setPresence({status: 'online',
+    activity: {
+      name: '-help',
+      type: 'LISTENING',
+    }})
+          message.channel.send('Fatto!');
         default:
-          client.commands.get('eval').execute(message, args, client, db);
+          client.commands.get('eval').execute(message, args, client, prefix);
       }
     } catch (err) {
-      console.log(err, message);
+      client.error(err, message);
     }
   }
 };

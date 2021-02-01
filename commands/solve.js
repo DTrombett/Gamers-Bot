@@ -2,8 +2,11 @@ const { MessageEmbed } = require('discord.js');
 
 module.exports = {
   name: 'solve',
-  description: '',
-  execute(message, args, client, db) {
+  help: '',
+  usage: '',
+  aliases: [],
+  examples: [],
+  execute: function(message, args, client, prefix) {
     try {
       if (message.author.id != '597505862449496065' || !args[0]) return;
       var embed = new MessageEmbed()
@@ -19,9 +22,9 @@ module.exports = {
       switch (args[0].toLowerCase()) {
         case "maxh":
           let i = args[1];
-          if(isNaN(i)) i = args[1].replace(',', '.');
+          if (isNaN(i)) i = args[1].replace(',', '.');
           i = parseFloat(i);
-          if(isNaN(i)) return message.channel.send('Inavlid Number');
+          if (isNaN(i)) return message.channel.send('Inavlid Number');
           let n = i.toString().split('.')[1];
           n = !!n ? n.length + 1 : 1;
           let t = 100 * i / 981;
@@ -40,7 +43,7 @@ module.exports = {
       }
       message.channel.send(embed);
     } catch (err) {
-      console.log(err, message);
+      client.error(err, message);
     }
   }
 };

@@ -1,11 +1,15 @@
 module.exports = {
   name: '',
   description: '',
-  async execute(message, args, client, db) {
+  help: '',
+  usage: '',
+  aliases: [],
+  examples: [],
+  execute: async function(message, args, client, prefix) {
     try {
       
     } catch (err) {
-      console.log(err, message);
+      client.error(err, message);
     }
   }
 };

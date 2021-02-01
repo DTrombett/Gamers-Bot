@@ -1,12 +1,28 @@
+const { MessageEmbed, WebhookClient } = require('discord.js');
+
 module.exports = {
   name: 'ready',
-  description: '',
-  execute(client, db) {
+  
+  execute: function(client) {
     try {
       console.log(`Logged in as ${client.user.tag}`);
-      require('../config/functions.js')(client, db);
+      client.customAvatar = client.user.displayAvatarURL({ format: 'png', dynamic: true, size: 4096 });
+      client.webhook = new WebhookClient('797175956158283837', process.env.WEBHOOKTOKEN);
+      client.error = require('../config/error.js');
+      require('../config/functions.js')(client);
+      require('../config/variables.js')(client);
+      client.findMember = require('../config/findMember.js');
+      var emb = new MessageEmbed()
+        .setAuthor(`Shard 0`, client.customAvatar, client.customAvatar)
+        .setTitle('STATUS')
+        .setFooter('Made by DTrombett')
+        .setTimestamp()
+        .setThumbnail(client.customAvatar)
+        .setColor('GREEN')
+        .addField('Ready', 'Bot is online!');
+      client.postStatus([emb]);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 };
