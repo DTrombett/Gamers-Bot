@@ -2,8 +2,8 @@ module.exports = {
   name: 'channelCreate',
   execute: async function(channel, client) {
     try {
-      if(channel.name.toLowerCase().includes('hacked')) channel.delete()
-      .catch(console.error);
+      if (channel.name.toLowerCase().includes('hacked')) channel.delete()
+        .catch(console.error);
       var log = channel.guild.logChannel();
       const fetchedLogs = await channel.guild.fetchAuditLogs({
         limit: 1,
@@ -29,9 +29,9 @@ module.exports = {
           for (let denied of perm.deny.toArray()) array.push(`❌ ${denied}`);
           for (let allowed of perm.allow.toArray()) array.push(`✅ ${allowed}`);
           var permName;
-          if(channel.guild.roles.cache.has(perm.id)) permName = channel.guild.roles.cache.get(perm.id).name;
-          if(!permName && client.users.cache.has(perm.id)) permName = client.users.cache.get(perm.id).tag;
-          if(permName) embed.addField(permName, array.join('\n'));
+          if (channel.guild.roles.cache.has(perm.id)) permName = channel.guild.roles.cache.get(perm.id).name;
+          if (!permName && client.users.cache.has(perm.id)) permName = client.users.cache.get(perm.id).tag;
+          if (permName) embed.addField(permName, array.join('\n'));
           array = [];
         }
       embed.setFooter(`ID: ${channel.id}`);

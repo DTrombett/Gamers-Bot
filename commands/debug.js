@@ -1,10 +1,11 @@
 const fetch = require('node-fetch');
 const { MessageAttachment, MessageEmbed } = require('discord.js');
-const { readdirSync, readFile } = require('fs');
+const { readdirSync, readFile, unlink } = require('fs');
 const canvacord = require('canvacord');
 var Zip = require('adm-zip');
 const format = require('dateformat');
 const ms = require('ms');
+const rimraf = require("rimraf");
 
 module.exports = {
   name: 'debug',
@@ -28,19 +29,17 @@ module.exports = {
             .filter(dirent => dirent.isDirectory())
             .map(dirent => dirent.name)
             .filter(dirent => !dirent.startsWith('.'))
-            .filter(dirent => dirent != 'node_modules' && dirent != 'variables');
+            .filter(dirent => !['node_modules', 'variables', 'backup'].includes(dirent));
           var attachments = [];
           for (let dir of getDirectories('./')) {
             let zip = new Zip();
             zip.addLocalFolder(`./${dir}`);
-            zip.writeZip(`./config/${dir}.zip`);
-            let att = new MessageAttachment(`./config/${dir}.zip`, dir + '.zip');
+            zip.writeZip(`./backup/${dir}.zip`);
+            let att = new MessageAttachment(`./backup/${dir}.zip`, dir + '.zip');
             attachments.push(att);
           }
-          await message.channel.send(`Backup completed! Took **${Date.now() - date}ms**`, attachments);
-          for (let dir of getDirectories('./')) fs.unlink(`./config/${dir}.zip`, err => {
-            if (err) throw err;
-          });
+          message.channel.send(`Backup completed! Took **${Date.now() - date}ms**`, attachments);
+          rimraf('./backup', () => console.log('Backup completed and files deleted. ', `Took ${Date.now() - date}`));
           break;
         case 'fetch':
           message.delete();
@@ -116,18 +115,22 @@ module.exports = {
           break;
         case 'man':
           var man = client.setVar('man', !client.getVar('man'));
-          if(man) await client.user.setPresence({
+          if (man) await client.user.setPresence({
             status: 'idle',
             activity: {
               name: 'Maintenance!',
               type: 'WATCHING',
             }
-          }); else await client.user.setPresence({status: 'online',
-    activity: {
-      name: '-help',
-      type: 'LISTENING',
-    }})
+          });
+          else await client.user.setPresence({
+            status: 'online',
+            activity: {
+              name: '-help',
+              type: 'LISTENING',
+            }
+          })
           message.channel.send('Fatto!');
+        break;
         default:
           client.commands.get('eval').execute(message, args, client, prefix);
       }

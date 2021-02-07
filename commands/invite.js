@@ -5,7 +5,7 @@ module.exports = {
   aliases: ['invite-me', 'inviteme'],
   execute: async function(message, args, client, prefix) {
     try {
-      if(message.author.id != '597505862449496065') return;
+      if (message.author.id != '597505862449496065') return;
       var options = {};
       options.permissions = new Permissions(8).toArray();
       if (args[0]) options.guild = await client.fetchInvite(args[0])

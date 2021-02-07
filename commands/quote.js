@@ -4,12 +4,10 @@ function notFound(message) {
   return message.channel.send('Non ho trovato questo messaggio all\'interno del server')
     .catch(console.error);
 }
-
 function rejected(message) {
   return message.channel.send('Si è verificato un errore durante l\'elaborazione della richiesta! Per favore controlla i miei permessi!')
     .catch(console.error);
 }
-
 function wrongUsage(message, prefix) {
   return message.channel.send(`Attenzione! Usa così il comando: \`${prefix}quote ID (#canale | ID)\` o \`${prefix}quote [link]\``)
     .catch(console.error);
@@ -20,13 +18,13 @@ module.exports = {
   description: 'Cita un messaggio nel server!',
   help: 'Vuoi riportare il testo di un messaggio nel server? Puoi farlo con questo comando! Basta inserire il link o l\'ID messaggio.',
   usage: ' {link | ID}',
-  aliases: [''],
-  examples: [' https://discord.com/channels/781085699487039520/787647474402983937/787647592443019304', ' 787647592443019304', '#testing 787647592443019304'],
+  aliases: [],
+  examples: [' https://discord.com/channels/781085699487039520/787647474402983937/787647592443019304', ' 787647592443019304', ' #testing 787647592443019304'],
   time: 5000,
   execute: async function(message, args, client, prefix) {
     try {
       if (!message.guild.available) return client.error('Guild is unavailable', message) && message.channel.send('Si è verificato un errore!')
-      .catch(console.error);
+        .catch(console.error);
       if (!args[0]) return wrongUsage(message, prefix);
       const link = `https://discord.com/channels/${message.guild.id}/`;
       var quoted;
@@ -70,8 +68,8 @@ module.exports = {
         format: 'png',
         size: 4096
       });
-      if(!username || !avatarURL) return client.error('Error fetching user data.', message) && rejected(message);
-      if(!msg) return client.error('Cannot get quoted content.', message) && rejected(message);
+      if (!username || !avatarURL) return client.error('Error fetching user data.', message) && rejected(message);
+      if (!msg) return client.error('Cannot get quoted content.', message) && rejected(message);
       options.set('username', username);
       options.set('avatarURL', avatarURL);
       if (embeds[0]) options.set('embeds', embeds);

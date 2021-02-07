@@ -65,10 +65,10 @@ module.exports = {
         .catch(console.error);
       if (target.user.id == message.guild.ownerID || target.hasPermission('ADMINISTRATOR') || target.roles.highest.position >= message.member.roles.highest.position && message.guild.ownerID != message.author.id) return message.channel.send("Non hai abbastanza permessi per eseguire questa azione!")
         .catch(console.error);
-      if (!member.user.tag) return client.error('Failed to get member tag.', message) && message.channel.send('Si è verificato un errore!')
+      if (!target.user.tag) return client.error('Failed to get member tag.', message) && message.channel.send('Si è verificato un errore!')
         .catch(console.error)
-      client.resetVar('warn', 'member', member);
-      return message.channel.send(`Fatto! Ho resettato tutti gli avvertimenti di **${escapeMarkdown(member.user.tag)}**.`)
+      client.resetVar('warn', 'member', target);
+      return message.channel.send(`Fatto! Ho resettato tutti gli avvertimenti di **${escapeMarkdown(target.user.tag)}**.`)
         .catch(console.error);
     } catch (err) {
       client.error(err, message);

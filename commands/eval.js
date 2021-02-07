@@ -5,7 +5,7 @@ const fs = require('fs');
 
 module.exports = {
   name: 'eval',
-  
+
   help: '',
   usage: '',
   aliases: [],

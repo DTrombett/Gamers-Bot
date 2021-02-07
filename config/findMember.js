@@ -139,6 +139,6 @@ module.exports = async (message, text, author, client) => {
     });
   if (client && client.cooldown) client.cooldown.delete(message.author.id);
   if (!member) return null;
-  if (!Array.isArray(member)) return message.guild.members.has(member.id) ? message.guild.members.get(member.id) : member;
+  if (!Array.isArray(member)) return message.guild.members.cache.has(member.id) ? message.guild.members.cache.get(member.id) : member;
   return null;
 }

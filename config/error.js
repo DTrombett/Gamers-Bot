@@ -1,4 +1,9 @@
+const { MessageEmbed, Message, escapeMarkdown } = require('discord.js');
+const { inspect } = require('util');
+
 module.exports = function(err, message) {
+  console.error(err);
+  var client = message.client;
   if (!message) return console.error(err);
   let channel = client.channels.cache.get('802929224935407686');
   var embed = new MessageEmbed()
@@ -6,7 +11,7 @@ module.exports = function(err, message) {
     .setColor('RED')
     .setFooter('Made by DTrombett')
     .setTimestamp();
-  if (Message instanceof message) embed
+  if (message instanceof Message) embed
     .setAuthor(message.member.displayName, message.author.displayAvatarURL({
       format: 'png',
       dynamic: true,
@@ -14,10 +19,10 @@ module.exports = function(err, message) {
     }))
     .setURL(`https://discord.com/channels/${message.guild.id}/${message.channel.id}/${message.id}`)
     .setDescription('```xl\n' + err.toString() + '```')
-    .addField('Message content', escapeMarkdown(message).substring(0, 1024))
+    .addField('Message content', escapeMarkdown(message.content).substring(0, 1024))
     .addField('Author', `Tag: **${escapeMarkdown(message.author.tag)}**\nID: ${message.author.id}\nMention: ${message.author}`)
     .addField('Channel', `Name: **${escapeMarkdown(message.channel.name)}**\nID: ${message.channel.id}\nMention: ${message.channel}`)
-    .addField('Guild', `Name: **${escapeMarkdown(message.guild)}**\nID: ${message.guild.id}`)
+    .addField('Guild', `Name: **${escapeMarkdown(message.guild.name)}**\nID: ${message.guild.id}`)
     .setThumbnail(message.guild.iconURL({
       format: 'png',
       dynamic: true,

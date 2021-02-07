@@ -17,11 +17,11 @@ module.exports = {
         .setThumbnail(client.customAvatar)
         .setFooter('Made by DTrombett')
         .setTimestamp()
-        .setDescription(client.getIDVar('prefix', messags.guild.id).map(p => {
+        .setDescription(client.getIDVar('prefix', message.guild.id).map(p => {
           if (p.includes(client.user.id)) return;
           i++;
-          return `**${i})** ${escapeMarkdown(p)}`
-        }));
+          return `${i}. ${escapeMarkdown(p)}`;
+        }).join(`\n`));
       message.channel.send(embed);
     } catch (err) {
       client.error(err, message);

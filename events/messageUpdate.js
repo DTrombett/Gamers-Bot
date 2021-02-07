@@ -1,6 +1,5 @@
 module.exports = {
   name: 'messageUpdate',
-  
   execute: async function(oldMessage, newMessage, client) {
     try {
       var message = newMessage.author !== null ? newMessage : await newMessage.fetch();

@@ -1,6 +1,5 @@
 module.exports = {
   name: 'messageDelete',
-  description: "Log deleted messages",
   execute: async function(message, client) {
     try {
       if (!message.guild || !message.member || !message.author || message.author.bot || message.channel.name.includes('admin')) return;
@@ -17,7 +16,7 @@ module.exports = {
         target = deletionLog.target;
         executor = deletionLog.executor;
       }
-      if (target.id === message.author.id && date - deletionLog < 100) mod = executor.tag;
+      if (target.id === message.author.id && date - deletionLog < 1000) mod = executor.tag;
       const channel = message.guild.logChannel();
       var content = message.content;
       var attachments = message.attachments.array();
@@ -26,7 +25,7 @@ module.exports = {
         .setFooter(`Canale: #${message.channel.name} `);
       if (mod) embed.addField('Executor', mod);
       if (attachments[0])
-        for (let att of attachments) embed.addField(`Attachment - ${att.name}`, att.url);
+        for (let att of attachments) embed.addField(`Attachment - ${att.name}`, att.proxyURL);
       channel.send({ embed: embed });
     } catch (err) {
       client.error(err, message);

@@ -18,16 +18,17 @@ module.exports = {
       if (target.id === messages.first().channel.id) mod = executor;
       if (!mod) mod = messages.first().author;
       const channel = messages.first().guild.logChannel();
-      const array = messages.map(message => `**${message.author.tag}**: ${message.content.substring(message.content.length - 180)}`).reverse();
+      const array = messages.map(message => `**${message.author ? message.author.tag : 'UNKNOWN'}**: ${message.content.substring(message.content.length - 180)}`).reverse();
       var count = array.length;
       let slice = array.slice(Math.max(array.length - 10, 0));
       var show = slice.length;
       const list = slice.join('\n');
       const embed = client.embedLog(`${count} messaggi eliminati in #${messages.first().channel.name}`, `https://discord.com/channels/${messages.first().guild.id}/${messages.first().channel.id}`, mod, list, messages.first().guild)
         .setFooter(`Ultimi ${show} visualizzati`);
-      channel.send({ embed: embed });
+      channel.send({ embed: embed })
+      .catch(console.error);
     } catch (err) {
-      client.error(err, messages);
+      client.error(err, messages.first());
     }
   }
 };

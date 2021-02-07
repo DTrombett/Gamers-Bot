@@ -14,7 +14,7 @@ module.exports = {
       if (!args[0]) return message.channel.send('Devi scrivere il bug da segnalare!')
         .catch(console.error);
       var avatar = message.author.displayAvatarURL({ format: 'png', dynamic: true, size: 4096 });
-      var attachment = message.attachments.first()
+      var attachment = message.attachments.first();
       if (attachment) attachment = attachment.proxyURL || '';
       const embed = new MessageEmbed()
         .setAuthor(message.author.tag, avatar, avatar)

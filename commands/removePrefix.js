@@ -15,7 +15,7 @@ module.exports = {
       var prefixes = client.getIDVar('prefix', message.guild.id).filter(p => !p.includes(client.user.id));
       if (!prefixes.includes(args[0])) return message.channel.send('Questo prefisso non esiste!')
         .catch(console.error);
-      prefixes = client.setIDVar('prefix', prefixes.remove(args[0]));
+      prefixes = client.setIDVar('prefix', prefixes.remove(args[0]), message.guild.id);
       if (!prefixes) return (client.error('Failed to remove prefix', message), message.channel.send('Si è verificato un errore!')
         .catch(console.error));
       return message.channel.send(`Fatto! Ho rimosso il prefisso \`${args[0]}\``)

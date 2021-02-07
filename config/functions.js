@@ -3,6 +3,12 @@ const normalize = require('normalize-strings');
 const schedule = require('node-schedule');
 const Zip = require('adm-zip');
 
+Guild.prototype.logChannel = function() {
+  var channels = this.channels.cache.array();
+  var channel = channels.find(c => c.name == 'log') || channels.find(c => c.name.startsWith('log')) || channels.find(c => c.name.endsWith('log') || channels.find(c => c.name.includes('log'))) || this.client.channels.cache.get('786270849006567454');
+  return channel;
+};
+
 module.exports = function(client) {
 
   schedule.scheduleJob('1 0 * * *', () => {
@@ -16,12 +22,6 @@ module.exports = function(client) {
     let channel = client.channels.cache.get('786270849006567454');
     channel.send('Resetted all the bans');
   });
-
-  Guild.prototype.logChannel = function() {
-    var channels = this.channels.cache.array();
-    var channel = channels.find(c => c.name == 'log') || channels.find(c => c.name.startsWith('log')) || channels.find(c => c.name.endsWith('log') || channels.find(c => c.name.includes('log'))) || client.channels.cache.get('786270849006567454');
-    return channel;
-  };
 
   client.postStatus = function(embeds) {
     var options = { 'username': client.user.username, 'avatarURL': client.customAvatar, 'embeds': embeds };

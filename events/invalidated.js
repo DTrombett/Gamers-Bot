@@ -1,6 +1,5 @@
 module.exports = {
   name: 'invalidated',
-  
   execute: function(client) {
     try {
       console.log('Client session is invalidated! Exiting the process...');

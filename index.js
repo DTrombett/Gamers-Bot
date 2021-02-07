@@ -6,7 +6,7 @@ console.log('Starting...');
 
 const Discord = require('discord.js');
 const client = new Discord.Client({
-  partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'USER', 'GUILD_MEMBER'],
+  partials: ['MESSAGE', 'REACTION', 'USER', 'GUILD_MEMBER'],
   messageCacheMaxSize: 500,
   messageCacheLifetime: 86400,
   messageSweepInterval: 3600,

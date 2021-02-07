@@ -2,7 +2,6 @@ const { MessageEmbed, WebhookClient } = require('discord.js');
 
 module.exports = {
   name: 'ready',
-  
   execute: function(client) {
     try {
       console.log(`Logged in as ${client.user.tag}`);
@@ -12,6 +11,7 @@ module.exports = {
       require('../config/functions.js')(client);
       require('../config/variables.js')(client);
       client.findMember = require('../config/findMember.js');
+      require('../config/Util.js');
       var emb = new MessageEmbed()
         .setAuthor(`Shard 0`, client.customAvatar, client.customAvatar)
         .setTitle('STATUS')

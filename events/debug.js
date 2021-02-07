@@ -2,7 +2,6 @@ const { MessageEmbed } = require('discord.js');
 
 module.exports = {
   name: 'debug',
-  
   execute: function(info, client) {
     try {
       if (info.includes('[HeartbeatTimer]')) return;

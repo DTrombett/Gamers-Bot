@@ -19,19 +19,22 @@ module.exports = {
         .catch(console.error);
       if (target.user.id == message.guild.ownerID || target.hasPermission('ADMINISTRATOR') || target.roles.highest.position >= message.member.roles.highest.position && message.guild.ownerID != message.author.id) return message.channel.send("Non hai abbastanza permessi per eseguire questa azione!")
         .catch(console.error);
-      if (!target.manageable) return message.channel.send('Non ho abbastanza permessi per smutare questo membro!')
-        .catch(console.error);
-      let muteRole = message.guild.roles.cache.find(rr => rr.name.toLowerCase() === "muted") || message.guild.roles.cache.find(rr => rr.name.toLowerCase() === 'mutato');
+      var muteRole = message.guild.roles.cache.find(rr => rr.name.toLowerCase() === "muted") || message.guild.roles.cache.find(rr => rr.name.toLowerCase() === 'mutato');
+      var has = target.roles.cache.has(muteRole.id);
+      if (!target.manageable) return !has ? message.channel.send('Non ho abbastanza permessi per smutare questo membro!')
+        .catch(console.error) : (client.resetVar('muted', 'member', target), message.channel.send(`**${escapeMarkdown(target.user.tag)}** è stato smutato!`));
       if (!muteRole) return message.channel.send('Non ho trovato il ruolo "Muted"')
         .catch(console.error);
-      if (!target.roles.cache.has(muteRole.id)) return message.reply("Questo membro non è mutato!")
+      if (!has && !client.getMemberVar('muted', target)) return message.reply("Questo membro non è mutato!")
         .catch(console.error);
       if (!target.user.tag) return client.error('Failed to get target tag.', message) && message.channel.send('Si è verificato un errore!')
         .catch(console.error);
-      let mute = await target.roles.remove(muteRole.id)
+      var mute;
+      if(has) mute = await target.roles.remove(muteRole.id)
         .catch(err => client.error(err, message));
-      if (!mute) return message.channel.send('Si è verificato un errore!')
+      if (!mute && has) return message.channel.send('Si è verificato un errore!')
         .catch(console.error);
+      client.resetVar('muted', 'member', target);
       return message.channel.send(`**${escapeMarkdown(target.user.tag)}** è stato smutato!`)
         .catch(console.error);
     } catch (err) {

@@ -1,6 +1,5 @@
 module.exports = {
   name: 'emojiDelete',
-  
   execute: async function(emoji, client) {
     try {
       var log = emoji.guild.logChannel();

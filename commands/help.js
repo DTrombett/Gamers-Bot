@@ -21,7 +21,7 @@ module.exports = {
   help: 'Mostra tutti i comandi del bot o delle informazioni riguardo un comando in particolare!',
   usage: ' (comando)',
   examples: ['', ' avatar'],
-  aliases: ['h', 'aiuto'],
+  aliases: ['h', 'aiuto', 'comandi', 'commands'],
   time: 5000,
   execute: async function(message, args, client, prefix) {
     try {
@@ -41,10 +41,11 @@ module.exports = {
           .setDescription(command.help)
           .addField('Uso', prefix + command.name + command.usage)
           .addField('Esempi', command.examples.map(c => `${prefix}${command.name}${c}`).join('\n'))
-          .addField('Alias', command.aliases.map(a => `${prefix}${a}`).join('\n'))
+          .addField('Alias', command.aliases.map(a => `${prefix}${a}`).join('\n') || 'none')
           .addField('Cooldown', ms(command.time || 1000))
           .setTimestamp()
-          .setFooter('Made by DTrombett')
+          .setFooter('Made by DTrombett');
+        return message.channel.send(commandHelp);
       }
       var commands = new Collection();
       var embeds = [];
