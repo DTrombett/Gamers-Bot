@@ -21,6 +21,7 @@
     "adm-zip": "^0.5.2",
     "canvacord": "^5.0.8",
     "dateformat": "^4.5.1",
+    "discord-canvas": "^1.4.1",
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",

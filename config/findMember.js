@@ -1,6 +1,6 @@
 const { escapeMarkdown } = require('discord.js');
-const { compareFunction } = require('./compareFunction');
-const { normalize } = require('./normalize');
+const compareFunction = require('./compareFunction');
+const normalize = require('./normalize');
 
 module.exports = async (message, text, author, client) => {
 

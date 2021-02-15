@@ -1,7 +1,7 @@
 const { Util } = require('discord.js');
-const { notFound } = require('../config/notFound');
-const { rejected } = require('../config/rejected');
-const { wrongUsage } = require('../config/wrongUsage');
+const notFound = require('../config/notFound');
+const rejected = require('../config/rejected');
+const wrongUsage = require('../config/wrongUsage');
 const { cleanContent, removeMentions } = Util;
 
 var commandObject = {
@@ -63,7 +63,7 @@ var commandObject = {
         });
       if (!webhooks)
         return rejected(message);
-      var webhook = webhooks.first();
+      var webhook = webhooks[0];
       var options = new Map();
       var embeds = [quoted.embeds[0]];
       var msg = removeMentions(cleanContent(quoted.content, quoted));

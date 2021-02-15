@@ -1,7 +1,7 @@
 const { Collection, MessageEmbed } = require('discord.js');
 const normalize = require('normalize-strings');
 const ms = require('ms');
-const { helpEmbed } = require('../config/helpEmbed');
+const helpEmbed = require('../config/helpEmbed');
 
 var commandObject = {
   name: 'help',

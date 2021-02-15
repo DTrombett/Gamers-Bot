@@ -1,5 +1,6 @@
 const normalize = require('normalize-strings');
 const execute = require("../config/execute.js");
+const automod = require('../config/auto-mod.js');
 
 module.exports = (message) => {
   var client = message.client;
@@ -23,7 +24,7 @@ module.exports = (message) => {
       if (command)
         execute(message, command, args, client, value);
     }
-    client.events.get('auto-mod').execute(message, client, value);
+    automod(message, client, value);
   } catch (err) {
     client.error(err, message);
   }

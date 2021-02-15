@@ -1,5 +1,5 @@
 const fetch = require('node-fetch');
-const { resolveLink } = require('../config/resolveLink');
+const resolveLink = require('../config/resolveLink');
 
 var commandObject = {
   name: 'tournament',
@@ -38,7 +38,7 @@ var commandObject = {
       if (!file)
         return sent.edit('Devi inserire un link torneo valido!')
           .catch(console.error);
-      var tournamentEmbed = resolveLink(file, message);
+      var tournamentEmbed = resolveLink(file, message, args);
       return typeof tournamentEmbed === 'object' ? sent.edit('', tournamentEmbed) : sent.edit(tournamentEmbed);
     } catch (err) {
       client.error(err, message);

@@ -1,9 +1,9 @@
 const { MessageEmbed } = require('discord.js');
 
-module.exports = (file, message) => {
+module.exports = (file, message, args) => {
   try {
-    let client = message.client;
-    let error = 'Devi inserire un link torneo valido!';
+    var client = message.client;
+    var error = 'Devi inserire un link torneo valido!';
     let parts = file.split(`<li class='content'>`);
     if (parts)
       parts.shift();

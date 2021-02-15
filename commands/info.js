@@ -1,7 +1,7 @@
 const { MessageEmbed } = require('discord.js');
 const format = { i18n } = require('dateformat');
 const time = require('pretty-ms');
-const { getEmoji } = require('../config/getEmoji');
+const getEmoji = require('../config/getEmoji');
 
 i18n = {
   dayNames: ["Dom", "Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"],
