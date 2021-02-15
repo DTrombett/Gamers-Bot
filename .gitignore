@@ -1,0 +1,7 @@
+.env
+Appunti.js
+node_modules/
+*.log
+/dist
+.vscode/
+package-lock.json
