@@ -1,4 +1,4 @@
-const { MessageEmbed, escapeMarkdown, Message, Guild } = require('discord.js');
+const { MessageEmbed, Guild } = require('discord.js');
 const { scheduleJob } = require('node-schedule');
 
 Guild.prototype.logChannel = function () {

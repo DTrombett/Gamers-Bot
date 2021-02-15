@@ -1,6 +1,6 @@
 const { Util } = require('discord.js');
 const { notFound } = require('../config/notFound');
-const { rejected } = require('./rejected');
+const { rejected } = require('../config/rejected');
 const { wrongUsage } = require('../config/wrongUsage');
 const { cleanContent, removeMentions } = Util;
 

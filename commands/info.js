@@ -1,5 +1,5 @@
 const { MessageEmbed } = require('discord.js');
-const format, { i18n } = require('dateformat');
+const format = { i18n } = require('dateformat');
 const time = require('pretty-ms');
 const { getEmoji } = require('../config/getEmoji');
 

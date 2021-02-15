@@ -1,4 +1,4 @@
-const { writeFile, writeFileSync, readFileSync } = require(`fs`);
+const { writeFile, readFileSync } = require(`fs`);
 const { Guild, GuildMember, User } = require(`discord.js`);
 
 module.exports = (client) => {

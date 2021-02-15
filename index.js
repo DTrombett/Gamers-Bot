@@ -69,7 +69,7 @@ for (let file of commandFiles) {
 }
 for (let file of eventFiles) {
   const event = require(`./events/${file}`);
-  const eventName = event.split('.')[1];
+  const eventName = file.split('.')[1];
   client.events.set(eventName, event);
 }
 for (let file of automod) {
