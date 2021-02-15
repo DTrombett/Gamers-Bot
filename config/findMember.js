@@ -1,15 +1,6 @@
 const { escapeMarkdown } = require('discord.js');
-var normal = require('normalize-strings');
-
-normalize = text => {
-  let regex = new RegExp('_', 'g');
-  let regex1 = new RegExp('-', 'g');
-  return normal(text).toLowerCase().split(/ +/).join(' ').replace(regex, ' ').replace(regex1, '').split('|').join('');
-};
-compareFunction = (a, b) => {
-  if ([normalize(a.user.tag), normalize(b.user.tag)].sort()[0] == normalize(a.user.tag)) return -1;
-  return 1;
-};
+const { compareFunction } = require('./compareFunction');
+const { normalize } = require('./normalize');
 
 module.exports = async (message, text, author, client) => {
 
@@ -20,7 +11,9 @@ module.exports = async (message, text, author, client) => {
    */
 
   if (client && client.cooldown && client.cooldown.has(message.author.id)) {
-    message.reply('Per favore, rispondi prima all\'ultimo comando o annullalo scrivendo 0').then(msg => msg.delete({ timeout: 10000 }));
+    message.reply('Per favore, rispondi prima all\'ultimo comando o annullalo scrivendo 0').then(msg => {
+      return msg.delete({ timeout: 10000 });
+    });
     message.delete()
       .catch(console.error);
     return null;
@@ -39,61 +32,87 @@ module.exports = async (message, text, author, client) => {
   if (!client) members = message.guild.members.cache.array();
   else
     for (let guild of client.guilds.cache.sort((a, b) => {
-        if (a.id == message.guild.id) return -1;
-        else if (b.id == message.guild.id) return 1;
-        else return 0;
-      }).array())
-      guild.members.cache.sort().array().every(m => members.push(m));
+      if (a.id == message.guild.id) return -1;
+      else if (b.id == message.guild.id) return 1;
+      else return 0;
+    }).array())
+      guild.members.cache.sort().array().every(m => {
+        return members.push(m);
+      });
   text = normalize(text);
-  if (!author) members = members.filter(m => m.user.id != message.author.id);
-  var member = message.mentions.members.first() || message.mentions.users.first() || members.filter(u => normalize(u.user.tag) == text);
+  if (!author) members = members.filter(m => {
+    return m.user.id != message.author.id;
+  });
+  var member = message.mentions.members.first() || message.mentions.users.first() || members.filter(u => {
+    return normalize(u.user.tag) == text;
+  });
   if (!Array.isArray(member) && (member != message.member || author)) return member;
   if (!Array.isArray(member)) return;
   var n = 0;
-  for (let m of members.filter(u => normalize(u.user.username) == text))
+  for (let m of members.filter(u => {
+    return normalize(u.user.username) == text;
+  }))
     if (n == 2) break;
     else member.push(m) && n++;
   n = 0;
-  for (let m of members.filter(u => normalize(u.displayName) == text && !member.includes(u)))
+  for (let m of members.filter(u => {
+    return normalize(u.displayName) == text && !member.includes(u);
+  }))
     if (n == 2) break;
     else member.push(m) && n++;
   n = 0;
-  for (let m of members.filter(u => normalize(u.user.tag).startsWith(text) && !member.includes(u)))
+  for (let m of members.filter(u => {
+    return normalize(u.user.tag).startsWith(text) && !member.includes(u);
+  }))
     if (n == 2) break;
     else member.push(m) && n++;
   n = 0;
-  for (let m of members.filter(u => normalize(u.user.tag).includes(text) && !member.includes(u)))
+  for (let m of members.filter(u => {
+    return normalize(u.user.tag).includes(text) && !member.includes(u);
+  }))
     if (n == 2) break;
     else member.push(m) && n++;
   n = 0;
-  for (let m of members.filter(u => normalize(u.user.tag).endsWith(text) && !member.includes(u)))
+  for (let m of members.filter(u => {
+    return normalize(u.user.tag).endsWith(text) && !member.includes(u);
+  }))
     if (n == 2) break;
     else member.push(m) && n++;
   n = 0;
-  for (let m of members.filter(u => normalize(u.user.username).endsWith(text) && !member.includes(u)))
+  for (let m of members.filter(u => {
+    return normalize(u.user.username).endsWith(text) && !member.includes(u);
+  }))
     if (n == 2) break;
     else member.push(m) && n++;
   n = 0;
-  for (let m of members.filter(u => normalize(u.displayName).startsWith(text) && !member.includes(u)))
+  for (let m of members.filter(u => {
+    return normalize(u.displayName).startsWith(text) && !member.includes(u);
+  }))
     if (n == 2) break;
     else member.push(m) && n++;
   n = 0;
-  for (let m of members.filter(u => normalize(u.displayName).includes(text) && !member.includes(u)))
+  for (let m of members.filter(u => {
+    return normalize(u.displayName).includes(text) && !member.includes(u);
+  }))
     if (n == 2) break;
     else member.push(m) && n++;
   n = 0;
-  for (let m of members.filter(u => normalize(u.displayName).endsWith(text) && !member.includes(u)))
+  for (let m of members.filter(u => {
+    return normalize(u.displayName).endsWith(text) && !member.includes(u);
+  }))
     if (n == 2) break;
     else member.push(m) && n++;
   n = 0;
   if (!member[0]) return;
   else if (member.length == 1) return message.guild.members.cache.has(member[0].id) ? message.guild.members.cache.get(member[0].id) : member[0];
   member.sort(compareFunction);
-  var msg = [];
-  var i = 1;
-  var ids = [];
+  var msg = [], i = 1, ids = [];
   for (let mb of member) ids.push(mb.user.id);
-  let rem = (values) => values.filter((v, i) => ids.indexOf(v.user.id) === i);
+  function rem(values) {
+    return values.filter((v, i) => {
+      return ids.indexOf(v.user.id) === i;
+    });
+  }
   member = rem(member);
   if (member.length == 1) return message.guild.members.cache.has(member[0].id) ? message.guild.members.cache.get(member[0].id) : member[0];
   for (let user of member) msg.push(`${i}. **${escapeMarkdown(user.user.tag)}**`) && i++;
@@ -101,16 +120,18 @@ module.exports = async (message, text, author, client) => {
   var sent = await message.channel.send(`Ho trovato più utenti che corrispondono a questo nome! Scrivi il numero dell'utente corretto o 0 per cancellare:\n\n${msg.join('\n')}`)
     .catch(console.error);
   if (!sent) return null;
-  const filter = (message) => {
+  function filter(message) {
     return !isNaN(message.content) && message.content >= 0 && message.content <= member.length && message.author.id == id;
-  };
+  }
   if (client && client.cooldown) client.cooldown.set(message.author.id, message.author);
   await message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] })
     .then(collected => {
       if (collected.first().content == '0') {
         message.channel.send('Comando cancellato!')
-          .then(s => s.delete({ timeout: 10000 })
-            .catch(console.error))
+          .then(s => {
+            return s.delete({ timeout: 10000 })
+              .catch(console.error);
+          })
           .catch(console.error);
         message.delete()
           .catch(console.error);
@@ -129,8 +150,10 @@ module.exports = async (message, text, author, client) => {
     .catch(err => {
       console.log(err);
       message.reply('Non hai inserito una risposta, comando cancellato!')
-        .then(msg => msg.delete({ timeout: 10000 })
-          .catch(console.error))
+        .then(msg => {
+          return msg.delete({ timeout: 10000 })
+            .catch(console.error);
+        })
         .catch(console.error);
       sent.delete()
         .catch(console.error);
@@ -141,4 +164,4 @@ module.exports = async (message, text, author, client) => {
   if (!member) return null;
   if (!Array.isArray(member)) return message.guild.members.cache.has(member.id) ? message.guild.members.cache.get(member.id) : member;
   return null;
-}
+};

@@ -1,27 +1,31 @@
-const { writeFile, writeFileSync } = require(`fs`);
+const { writeFile, writeFileSync, readFileSync } = require(`fs`);
 const { Guild, GuildMember, User } = require(`discord.js`);
 
-module.exports = function(client) {
+module.exports = (client) => {
 
-  client.getDefault = function(name) {
-    return require('./default.json')[name];
+  client.getDefault = (name) => {
+    return JSON.parse(readFileSync('./config/default.json'))[name];
   };
 
-  client.getMemberVar = function(name, member) {
-    if (!(member instanceof GuildMember)) throw new TypeError(`Invalid type! GuildMember expected.`);
-    if (!member.guild || !member.user) throw new TypeError(`Unknown Member`);
+  client.getMemberVar = (name, member) => {
+    if (!(member instanceof GuildMember))
+      throw new TypeError(`Invalid type! GuildMember expected.`);
+    if (!member.guild || !member.user)
+      throw new TypeError(`Unknown Member`);
     let list = client.var(name);
     let defaultVal = client.getDefault(name);
-    if (!list) return defaultVal;
+    if (!list)
+      return defaultVal;
     let serverID = member.guild.id;
     let id = member.user.id;
     let server = list[serverID];
-    if (!server) return defaultVal;
+    if (!server)
+      return defaultVal;
     let num = server[id] === undefined ? defaultVal : server[id];
     return num;
   };
 
-  client.getIDVar = function(name, id) {
+  client.getIDVar = function (name, id) {
     if (isNaN(id) || id.length > 18 || id.length < 17) throw new TypeError(`Invalid type! ID expected.`);
     let list = client.var(name);
     let defaultVal = client.getDefault(name);
@@ -30,13 +34,13 @@ module.exports = function(client) {
     return num;
   };
 
-  client.getVar = function(name) {
+  client.getVar = function (name) {
     let list = client.var(name);
     let num = list === undefined ? defaultVal : list;
     return num;
   };
 
-  client.setMemberVar = function(name, value, member) {
+  client.setMemberVar = function (name, value, member) {
     if (!(member instanceof GuildMember)) throw new TypeError(`Invalid type! GuildMember expected.`);
     if (!member.guild || !member.user) throw new TypeError(`Unknown Member`);
     let list = client.var(name);
@@ -51,7 +55,7 @@ module.exports = function(client) {
     return list[serverID][member.user.id];
   };
 
-  client.setIDVar = function(name, value, id) {
+  client.setIDVar = function (name, value, id) {
     if (isNaN(id) || id.length > 18 || id.length < 17) throw new TypeError(`Invalid type! ID expected.`);
     let list = client.var(name);
     if (!list) list = {};
@@ -63,7 +67,7 @@ module.exports = function(client) {
     return list[id];
   };
 
-  client.setVar = function(name, value) {
+  client.setVar = function (name, value) {
     let list = client.var(name);
     list = value;
     writeFile(`./variables/${name}.json`, JSON.stringify(list), function writeJSON(err) {
@@ -73,19 +77,7 @@ module.exports = function(client) {
     return list;
   };
 
-  client.createVar = function(name, defVal) {
-    let defaultList = require(`./default.json`);
-    defaultList[name] = defVal;
-    writeFile(`./config/default.json`, JSON.stringify(defaultList), function writeJSON(err) {
-      if (err) return console.log(err);
-      return console.log(JSON.stringify(defaultList));
-    });
-    writeFileSync(`./variables/${name}.json`, JSON.stringify(``), function writeJSON(err) {
-      if (err) return console.log(err);
-    });
-  };
-
-  client.resetVar = function(name, type, element) {
+  client.resetVar = function (name, type, element) {
     var list = client.var(name);
     if (!list) return;
     switch (type) {

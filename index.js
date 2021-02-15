@@ -1,11 +1,15 @@
-'use strict';
+/**
+ * Project: Gamers Bot
+ * Author: DTrombett
+ * Version: 5.0 (unstable)
+ */
 
 console.log('Starting...');
 
 // Starts declaring constants
 
-const Discord = require('discord.js');
-const client = new Discord.Client({
+const { Client, Collection } = require('discord.js');
+const client = new Client({
   partials: ['MESSAGE', 'REACTION', 'USER', 'GUILD_MEMBER'],
   messageCacheMaxSize: 500,
   messageCacheLifetime: 86400,
@@ -22,23 +26,29 @@ const client = new Discord.Client({
       name: '-help',
       type: 'LISTENING',
     }
+  },
+  ws: {
+    large_threshold: 100,
+    intents: 3934
   }
 });
-const fs = require('fs');
-const Database = require('@replit/database');
-const db = new Database();
-const commandFiles = fs.readdirSync('./commands/').filter(file => file.endsWith('.js'));
-const eventFiles = fs.readdirSync('./events/').filter(event => event.endsWith('.js'));
-const slashCommands = fs.readdirSync('./slashCommands/').filter(file => file.endsWith('.js'));
-const automod = fs.readdirSync('./automod/').filter(file => file.endsWith('.js'));
+const { readdirSync } = require('fs');
+const commandFiles = readdirSync('./commands/').filter(file => {
+  return file.endsWith('.js');
+});
+const eventFiles = readdirSync('./events/').filter((event) => {
+  return event.endsWith('.js');
+});
+const automod = readdirSync('./automod/').filter(file => {
+  return file.endsWith('.js');
+});
 const express = require('express');
 const app = express();
 const port = 3000;
-const bodyParser = require('body-parser');
-const jsonParser = bodyParser.json();
 const { inspect } = require('util');
-client.time = 0;
-client.var = function(name) {
+const Command = require('./config/Command.js');
+
+client.var = (name) => {
   return require(`./variables/${name}.json`);
 };
 
@@ -46,23 +56,20 @@ console.log('Constants declared');
 
 // Load commands
 
-client.commands = new Discord.Collection();
-client.events = new Discord.Collection();
-client.slashCommands = new Discord.Collection();
-client.cooldown = new Discord.Collection();
-client.automod = new Discord.Collection();
+client.commands = new Collection();
+client.events = new Collection();
+client.slashCommands = new Collection();
+client.cooldown = new Collection();
+client.automod = new Collection();
 
 for (let file of commandFiles) {
   const command = require(`./commands/${file}`);
-  client.commands.set(command.name, command);
+  client.commands.set(command.name, new Command(command));
 }
 for (let file of eventFiles) {
   const event = require(`./events/${file}`);
-  client.events.set(event.name, event);
-}
-for (let file of slashCommands) {
-  const slashCommand = require(`./slashCommands/${file}`);
-  client.slashCommands.set(slashCommand.name, slashCommand);
+  const eventName = event.split('.')[1];
+  client.events.set(eventName, event);
 }
 for (let file of automod) {
   const automodFile = require(`./automod/${file}`);
@@ -73,84 +80,127 @@ console.log('All the commands are ready!');
 
 // Track all the events
 
-process.on('unhandledRejection', (reason, promise) => console.log('A promise was rejected! Promise: ', promise, ' Reason: ', reason));
-process.on('beforeExit', (code) => console.log('Process is exiting with code: ', code));
-process.on('exit', (code) => console.log('Process exit event with code: ', code));
-process.on('disconnect', code => console.log('Process disconnected with code: ', code));
-process.on('message', (message, sendHandle) => console.log('Process received a message! ', message, sendHandle));
-process.on('multipleResolves', (type, promise, reason) => console.error('A promise was resolved morr than once! Promise: ', promise, ' Type: ', type, ' Reason: ', reason));
-process.on('uncaughtException', (err, origin) => console.log('Error occurred! Error: ', err, ' Origin: ', origin, ' Process exiting...'));
-process.on('uncaughtExceptionMonitor', (err, origin) => console.log('Something is fishy... ', err, origin));
-process.on('warning', (warning) => console.warn(warning));
-
-client.once('ready', () => client.events.get('ready').execute(client));
-client.once('shardReady', (id, unavailableGuilds) => console.log(`Shard ${id} is ready! Unavailable Guilds: `, unavailableGuilds));
-client.once('error', error => console.error('A Discord error occurred! Error: ', error));
-client.once('shardError', (error, shardID) => console.error(`Received an error on shard ${shardID} `, `Message: ${error}`));
-client.once('shardResume', (id, replayedEvents) => console.log(`Shard ${id} resumed! Replayed ${replayedEvents}`));
-client.once('invalidated', () => {
-  client.events.get('invalidated').execute(client);
+process.on('unhandledRejection', (reason, promise) => {
+  return console.log('Promise rejected! Reason: ', reason);
 });
-client.on('shardReconnecting', (id) => console.log(`Shard ${id} is trying to reconnect...`));
-client.once('shardDisconnect', (event, id) => console.log(`Shard ${id} disconnected! Event: ${event} `));
+process.on('beforeExit', (code) => {
+  return console.log('Process exiting with code: ', code);
+});
+process.on('exit', (code) => {
+  return console.log('Process exit with code: ', code);
+});
+process.on('disconnect', code => {
+  return console.log('Process disconnected with code: ', code);
+});
+process.on('message', (message, sendHandle) => {
+  return console.log('Process received a message! ', message, sendHandle);
+});
+process.on('multipleResolves', (type, promise, reason) => {
+  return console.error('A promise was resolved more than once! Type: ', type, ' Reason: ', reason);
+});
+process.on('uncaughtException', (err, origin) => {
+  return console.log('Error occurred! Error: ', err, ' Origin: ', origin);
+});
+process.on('uncaughtExceptionMonitor', (err, origin) => {
+  return console.log('Error ', err, origin);
+});
+process.on('warning', (warning) => {
+  return console.warn(warning);
+});
+
+client.once('ready', () => {
+  return console.log(`Logged in as ${client.user.tag}`);
+});
+client.on('shardReady', (id, unavailableGuilds) => {
+  return client.events.get('ready')(client, id, unavailableGuilds);
+});
+client.once('error', error => {
+  return console.error('Discord error occurred! Error: ', error);
+});
+client.on('shardError', (error, shardID) => {
+  return console.error(`Received an error on shard ${shardID} `, `Message: ${error}`);
+});
+client.on('shardResume', (id, replayedEvents) => {
+  return client.events.get('resume')(client, id, replayedEvents);
+});
+client.once('invalidated', () => {
+  return process.exit('Bot session invalidated!');
+});
+client.on('shardReconnecting', (id) => {
+  return client.events.get('reconnect')(client, id);
+});
+client.on('shardDisconnect', (event, id) => {
+  return client.events.get('disconnect')(client, event, id);
+});
 client.on('message', message => {
-  client.events.get('message').execute(message, client);
+  return client.events.get('message')(message, client);
 });
 client.on('debug', info => {
-  client.events.get('debug').execute(info, client);
+  return client.events.get('debug')(info, client);
 });
-client.on('warn', function(info) {
-  console.warn(`WARNING: ${info}`);
+client.on('warn', info => {
+  return console.warn(`WARNING: ${info}`);
 });
 client.on('guildCreate', guild => {
-  console.log(`Bot joined a new guild! Guild: ${inspect(guild)}`);
+  return console.log(`Bot joined a new guild! Guild: ${inspect(guild)}`);
 });
 client.on('guildDelete', guild => {
-  console.log(`Bot left a guild! Guild: ${inspect(guild)}`);
+  return console.log(`Bot left a guild! Guild: ${inspect(guild)}`);
 });
 client.on('guildUnavailable', guild => {
-  console.log(`A guild is unavailable! Guild: ${inspect(guild)}`);
+  return console.log(`A guild is unavailable! Guild: ${inspect(guild)}`);
 });
 client.on('rateLimit', rateLimitInfo => {
-  console.log(`Bot hitted rate limit! Info: ${inspect(rateLimitInfo)}`);
+  return console.log(`Bot hitted rate limit! Info: ${inspect(rateLimitInfo)}`);
 });
 client.on('messageDelete', message => {
-  client.events.get('messageDelete').execute(message, client);
+  return client.events.get('messageDelete')(message, client);
 });
 client.on('messageDeleteBulk', messages => {
-  client.events.get('messageDeleteBulk').execute(messages, client);
+  return client.events.get('messageDeleteBulk')(messages, client);
 });
 client.on('channelCreate', channel => {
-  client.events.get('channelCreate').execute(channel, client);
+  return client.events.get('channelCreate')(channel, client);
 });
 client.on('channelDelete', channel => {
-  client.events.get('channelDelete').execute(channel, client);
+  return client.events.get('channelDelete')(channel, client);
 });
 client.on('emojiDelete', emoji => {
-  client.events.get('emojiDelete').execute(emoji, client);
+  return client.events.get('emojiDelete')(emoji, client);
 });
 client.on('messageUpdate', (oldMessage, newMessage) => {
-  client.events.get('messageUpdate').execute(oldMessage, newMessage, client);
+  return client.events.get('messageUpdate')(oldMessage, newMessage, client);
 });
-client.on('guildBanAdd', (guild, user) => client.events.get('guildBanAdd').execute(guild, user, client));
-
-client.ws.on('INTERACTION_CREATE', interaction => {
-  client.events.get('INTERACTION_CREATE').execute(interaction, client);
+client.on('guildBanAdd', (guild, user) => {
+  return client.events.get('guildBanAdd')(guild, user, client);
+});
+client.on('guildMemberAdd', member => {
+  return client.events.get('guildMemberAdd')(member, client);
 });
 
 console.log('Events loaded! Starting to connect...');
 
 // Log the bot in and initialize the website
 
-app.get('/', (req, res) => {
-  res.sendFile('server/index.html', { root: __dirname });
-  console.log('GET request received from: ', req.headers['user-agent']);
+app.use((req, res, next) => {
+  var path = req.url.split('/');
+  path.shift();
+  if (req.headers.referer !== 'https://gamersbot.dtrombett.repl.co/' || !req.headers.referer.startsWith(req.headers.origin) || path[0] != 'api') return res.redirect('https://gamersbot.dtrombett.repl.co');
+  path.shift();
+  res.set('Access-Control-Allow-Origin', 'https://gamersbot.dtrombett.repl.co');
+  var response;
+  try {
+    response = require(`./server/${path[0]}.js`)(req, path, client);
+  } catch (err) {
+    res.status(404).send();
+    console.error(err);
+  }
+  if (!response) return;
+  res.send(JSON.stringify(response));
 });
-app.use(function(req, res, next) {
-  if (!fs.existsSync(`./server${req.url}`)) return res.send("Non c'è niente qui!");
-  res.sendFile(`server${req.url}`, { root: __dirname });
+app.listen(port, () => {
+  return console.log(`Listening at http://localhost:${port}`);
 });
-app.listen(port, () => console.log(`Listening at http://localhost:${port}`));
 
 client.login(process.env.DISCORD_TOKEN);
 

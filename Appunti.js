@@ -1,17 +1,19 @@
-module.exports = {
+var commandObject = {
   name: '',
   description: '',
   help: '',
-  usage: '',
+  usage: ' ',
   aliases: [],
   examples: [],
-  execute: async function(message, args, client, prefix) {
+  time: 1000,
+  execute: async (message, args, client, prefix) => {
     try {
-
     } catch (err) {
       client.error(err, message);
     }
   }
 };
+
+module.exports = commandObject;
 
 displayAvatarURL({ format: 'png', dynamic: true, size: 4096 })
