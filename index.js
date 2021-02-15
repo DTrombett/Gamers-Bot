@@ -1,7 +1,7 @@
 /**
  * Project: Gamers Bot
  * Author: DTrombett
- * Version: 5.0 (unstable)
+ * Version: 5.0.0
  */
 
 console.log('Starting...');
@@ -9,6 +9,7 @@ console.log('Starting...');
 // Starts declaring constants
 
 const { Client, Collection } = require('discord.js');
+require('dotenv').config();
 const client = new Client({
   partials: ['MESSAGE', 'REACTION', 'USER', 'GUILD_MEMBER'],
   messageCacheMaxSize: 500,
