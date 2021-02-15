@@ -29,8 +29,7 @@ const client = new Client({
     }
   },
   ws: {
-    large_threshold: 100,
-    intents: 3934
+    large_threshold: 100
   }
 });
 const { readdirSync } = require('fs');
@@ -69,7 +68,7 @@ for (let file of commandFiles) {
 }
 for (let file of eventFiles) {
   const event = require(`./events/${file}`);
-  const eventName = file.split('.')[1];
+  const eventName = file.split('.')[0];
   client.events.set(eventName, event);
 }
 for (let file of automod) {
