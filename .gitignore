@@ -1,8 +1,9 @@
 .env
 Appunti.js
-node_modules/
+node_modules
 *.log
 /dist
 .vscode/
 variables/
 package-lock.json
+desktop.ini
