@@ -1,6 +1,6 @@
 {
   "name": "gamers-bot",
-  "version": "1.0.0",
+  "version": "5.1.0",
   "description": "My personal Discord Bot",
   "main": "index.js",
   "scripts": {
