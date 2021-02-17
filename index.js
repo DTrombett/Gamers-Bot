@@ -52,7 +52,6 @@ const express = require('express');
 const app = express();
 const port = 3000;
 const { inspect } = require('util');
-const Command = require('./config/Command.js');
 
 console.log('Constants declared');
 
@@ -67,7 +66,7 @@ client.automod = new Collection();
 // Handle the files in correct property
 for (let file of commandFiles) {
     const command = require(`./commands/${file}`);
-    client.commands.set(command.name, new Command(command));
+    client.commands.set(command.name, command);
 }
 for (let file of eventFiles) {
     const event = require(`./events/${file}`);
