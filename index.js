@@ -10,9 +10,6 @@ console.log('Starting...');
 
 const { Client, Collection } = require('discord.js');
 
-// Configure the dotenv module
-require('dotenv').config();
-
 // Create a new Client
 const client = new Client({
     partials: ['MESSAGE', 'REACTION', 'USER', 'GUILD_MEMBER'],
