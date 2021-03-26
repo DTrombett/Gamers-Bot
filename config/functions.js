@@ -6,14 +6,6 @@ Guild.prototype.logChannel = function () {
   return channel;
 };
 
-client.postStatus = (embeds) => {
-  var options = { 'username': client.user.username, 'avatarURL': client.customAvatar, 'embeds': embeds };
-  client.webhook.send(options)
-    .catch(err => {
-      return client.error(err, embeds);
-    });
-};
-
 client.embedLog = (event, url, user, content, guild) => {
   const options = { format: 'png', dynamic: true, size: 4096 };
   if (!user) {
