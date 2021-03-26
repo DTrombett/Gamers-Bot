@@ -79,7 +79,7 @@ Array.prototype.remove = function () {
  * @returns {TextChannel} The log channel found
  */
 Guild.prototype.getLogChannel = function () {
-  return this.client.channels.cache.get('786270849006567454');;
+  return this.client.channels.cache.get('786270849006567454');
 };
 
 /**

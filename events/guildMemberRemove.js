@@ -21,7 +21,7 @@ module.exports = async (member) => {
     target = kickLog.target;
     executor = kickLog.executor;
     if (!target || !executor || target.id !== member.user.id) return null;
-    var channel = member.guild.logChannel();
+    var channel = member.client.channels.cache.get('786270849006567454');
     var embed = createEmbedLog('Member kicked', target.buildAvatar(), executor, `**${escapeMarkdown(target.tag)}** (${target}) è stato cacciato dal server!`, member.guild)
       .addField('Entrato nel server', dateFormat(member.joinedAt, 'dddd dd mmmm yyyy HH:MM:ss'))
       .addField('Nickname', escapeMarkdown(member.nickname || '') || '*None*')
