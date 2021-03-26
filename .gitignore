@@ -1,6 +1,7 @@
 .env
 Appunti.js
 node_modules/
+dashboard/
 *.log
 /dist
 .vscode/

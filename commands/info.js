@@ -1,33 +1,23 @@
-const { MessageEmbed } = require('discord.js');
-const format = { i18n } = require('dateformat');
+const { MessageEmbed, Message } = require('discord.js');
+const format = require('dateformat');
 const time = require('pretty-ms');
 const getEmoji = require('../config/getEmoji');
+const Command = require('../config/Command');
+const findMember = require('../config/findMember');
+const error = require('../config/error');
 
-i18n = {
-  dayNames: ["Dom", "Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"],
-  monthNames: ["Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic", "Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"],
-  timeNames: ["a", "p", "am", "pm", "A", "P", "AM", "PM"],
-};
+const command = new Command('info',
 
-var commandObject = {
-  name: 'info',
-  description: 'Scopri le informazioni di un utente!',
-  help: 'Guarda le informazioni su un utente nel server. Puoi anche usare l\'ID per utenti che non sono nel server!',
-  usage: ' (@utente | username | ID)',
-  examples: ['', ' @DTrombett#2000', ' Trombett', ' 597505862449496065'],
-  aliases: ['ui', 'user', 'userinfo', 'member'],
-  time: 2000,
-  execute: async (message, args, client, prefix) => {
+  /**
+   * Scopri le informazioni di un utente!
+   * @param {Message} message - The message with the command
+   * @param {Array<String>} args - The args of this message
+   */
+  async function (message, args) {
     try {
-      if (!message.guild.available)
-        return client.error('Guild unavailable.', message) && message.channel.send('Si è verificato un errore!')
-          .catch(console.error);
-      if (!message.author.tag)
-        return client.error('Author tag undefined.', message) && message.channel.send('Si è verificato un errore!')
-          .catch(console.error);
-      var member = await client.findMember(message, args.join(' '), true, client);
+      var member = await findMember(message, args.join(' '), true, message.client);
       if (member === null)
-        return;
+        return null;
       if (!member)
         return message.channel.send('Non ho trovato questo utente!')
           .catch(console.error);
@@ -43,7 +33,7 @@ var commandObject = {
         for (let flag of flags.filter(b => {
           return b != 'TEAM_USER' && b != 'SYSTEM' && b != 'VERIFIED_DEVELOPER' && b != 'DISCORD_PARTNER';
         }))
-          emojiFlags.push(getEmoji(flag, client));
+          emojiFlags.push(getEmoji(flag, message.client));
       emojiFlags = !emojiFlags[0] ? 'None' : emojiFlags.join(' ');
       var id = user.id;
       var status = user.presence.status;
@@ -55,7 +45,7 @@ var commandObject = {
       });
       let color = member.displayHexColor || message.guild.roles.highest.color;
       if (!color || !tag || !avatar || !id || !emojiFlags || !createdAt || !passed || !status || !bot)
-        return client.error('Failed to fetch user info.', message) && message.channel.send('Si è verificato un errore!')
+        return error('Failed to fetch user info.', message) && message.channel.send('Si è verificato un errore!')
           .catch(console.error);
       const embedInfo = new MessageEmbed()
         .setColor(color)
@@ -76,16 +66,21 @@ var commandObject = {
           size: 4096
         }));
       if (!embedInfo)
-        return client.error('Failed to create embed.', message) && message.channel.send('Si è verificato un errore!')
+        return error('Failed to create embed.', message) && message.channel.send('Si è verificato un errore!')
           .catch(console.error);
       return message.channel.send(embedInfo)
         .catch(err => {
           return console.error(err);
         });
     } catch (err) {
-      client.error(err, message);
+      error(err, message);
     }
-  }
-};
+  })
+  .setDescription('Scopri le informazioni di un utente!')
+  .setHelp('Guarda le informazioni su un utente nel server. Puoi anche usare l\'ID per utenti che non sono nel server!')
+  .setUsage('(@utente | username | ID)')
+  .addExample('', ' @DTrombett#2000', ' Trombett', ' 597505862449496065')
+  .addAlias('ui', 'user', 'userinfo', 'member')
+  .setCooldown(2000);
 
-module.exports = commandObject;
+module.exports = command;

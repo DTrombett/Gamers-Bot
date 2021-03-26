@@ -1,18 +1,18 @@
-const { escapeMarkdown } = require('discord.js');
+const { escapeMarkdown, Message } = require('discord.js');
+const Command = require('../config/Command');
+const error = require('../config/error');
+const findMember = require('../config/findMember');
+const { resetVar } = require('../config/variables');
 
-var commandObject = {
-  name: 'resetwarn',
-  description: 'Reimposta gli avvertimenti dei membri',
-  help: 'Usa questo comando se vuoi resettare gli avvertimenti di un membro del server o di tutti i membri.',
-  usage: ' (@utente | username | ID )',
-  aliases: ['reset-warn', 'reset'],
-  examples: ['', ' @DTrombett#2000', ' Trombett', ' 597505862449496065'],
-  time: 5000,
-  execute: async (message, args, client, prefix) => {
+const command = new Command('resetwarn',
+
+  /**
+   * Reimposta gli avvertimenti dei membri!
+   * @param {Message} message - The message with the command
+   * @param {Array<String>} args - The args of this message
+   */
+  async function (message, args) {
     try {
-      if (!message.guild.available)
-        return client.error('Guild is unavailable.', message) && message.channel.send('Si è verificato un errore!')
-          .catch(console.error);
       if (!message.member.hasPermission('ADMINISTRATOR'))
         return message.channel.send('Non hai abbastanza permessi ler eseguire questa azione!')
           .catch(console.error);
@@ -20,7 +20,7 @@ var commandObject = {
         var sent = await message.channel.send('Sei sicuro di voler cancellare gli avvertimenti di tutti i membri del server? **NOTA: Questa azione non può essere annulata!**')
           .catch(console.error);
         if (!sent)
-          return;
+          return null;
         let reacted = await sent.react('✅')
           .then(() => {
             return sent.react('❎');
@@ -40,7 +40,7 @@ var commandObject = {
           .then(async (collected) => {
             const reaction = collected.first();
             if (reaction.emoji.name === '✅') {
-              client.resetVar('warn', 'id', message.guild.id);
+              resetVar('warn', 'id', message.guild.id);
               message.channel.send('Fatto! Ho resettato gli avvertimenti di tutti i membri del server.')
                 .catch(console.error);
               return sent.delete()
@@ -64,11 +64,11 @@ var commandObject = {
             sent.delete({ timeout: 10000 })
               .catch(console.error);
           });
-        return;
+        return null;
       }
-      var target = await client.findMember(message, args.join(' '), true);
+      var target = await findMember(message, args.join(' '), true);
       if (target === null)
-        return;
+        return null;
       if (!target)
         return message.channel.send('Non ho trovato questo membro!')
           .catch(console.error);
@@ -76,15 +76,20 @@ var commandObject = {
         return message.channel.send("Non hai abbastanza permessi per eseguire questa azione!")
           .catch(console.error);
       if (!target.user.tag)
-        return client.error('Failed to get member tag.', message) && message.channel.send('Si è verificato un errore!')
+        return error('Failed to get member tag.', message) && message.channel.send('Si è verificato un errore!')
           .catch(console.error);
-      client.resetVar('warn', 'member', target);
+      resetVar('warn', 'member', target);
       return message.channel.send(`Fatto! Ho resettato tutti gli avvertimenti di **${escapeMarkdown(target.user.tag)}**.`)
         .catch(console.error);
     } catch (err) {
-      client.error(err, message);
+      error(err, message);
     }
-  }
-};
+  })
+  .setDescription('Reimposta gli avvertimenti dei membri')
+  .setHelp('Usa questo comando se vuoi resettare gli avvertimenti di un membro del server o di tutti i membri.')
+  .setUsage('(@utente | username | ID )')
+  .addAlias('reset-warn', 'reset')
+  .addExample('', ' @DTrombett#2000', ' Trombett', ' 597505862449496065')
+  .setCooldown(5000);
 
-module.exports = commandObject;
+module.exports = command;

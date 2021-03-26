@@ -1,23 +1,29 @@
-const { MessageAttachment, MessageEmbed } = require('discord.js');
-const { readdirSync, readFile, unlink } = require('fs');
+const { MessageAttachment, MessageEmbed, Message } = require('discord.js');
+const { readdirSync, readFile } = require('fs');
 const Zip = require('adm-zip');
 const ms = require('ms');
 const rimraf = require('rimraf');
 const fetch = require('node-fetch');
+const Command = require('../config/Command');
+const { getVar, setVar } = require('../config/variables');
+const error = require('../config/error');
 
-var commandObject = {
-  name: 'debug',
-  aliases: ['try', 'test'],
-  execute: async (message, args, client, prefix) => {
+const command = new Command('debug',
+
+  /**
+   * @param {Message} message - The message with the command
+   * @param {Array<String>} args - The args of this message
+   * @param {String} prefix - The prefix used in the message
+   */
+  async function (message, args, prefix) {
     try {
       if (message.author.id != '597505862449496065')
-        return;
+        return null;
       var date = Date.now();
       message.delete();
       switch (args[0].toLowerCase()) {
         case 'uptime':
-          return message.channel.send(ms(client.uptime));
-          break;
+          return message.channel.send(ms(message.client.uptime));
         case 'backup':
           function getDirectories(source) {
             return readdirSync(source, { withFileTypes: true })
@@ -49,9 +55,9 @@ var commandObject = {
           message.delete();
           var text;
           var json;
-          var error = [];
+          var errors = [];
           var attachment;
-          await fetch(args[2]).then(async res => {
+          await fetch(args[2]).then(async (res) => {
             if (!res.ok) {
               message.channel.send('Failed!');
               return console.log(res);
@@ -61,18 +67,18 @@ var commandObject = {
                 text = await res.text()
                   .catch(err => {
                     console.error(err);
-                    error.push('text');
+                    errors.push('text');
                   });
-                if (!error.includes('text'))
+                if (!errors.includes('text'))
                   attachment = new MessageAttachment(Buffer.from(text), 'fetched.html');
                 break;
               case 'json':
                 json = await res.json()
                   .catch(err => {
                     console.error(err);
-                    error.push('json');
+                    errors.push('json');
                   });
-                if (!error.includes('json'))
+                if (!errors.includes('json'))
                   attachment = new MessageEmbed()
                     .setDescription('Check the console for results!');
                 console.log(json);
@@ -110,9 +116,10 @@ var commandObject = {
         case 'sendmessage':
           message.delete();
           args.shift();
-          let channel = client.channels.cache.find(c => c.toString() == args[0]) || client.channels.cache.find(c => c.id == args[0]) || client.channels.cache.find(c => c.name == args[0]);
+          let channel = message.client.channels.cache.find(c => c.toString() == args[0]) || message.client.channels.cache.find(c => c.id == args[0]) || message.client.channels.cache.find(c => c.name == args[0]);
           if (!channel)
             channel = message.channel;
+
           else
             args.shift();
           channel.send(args.join(' '));
@@ -123,17 +130,19 @@ var commandObject = {
           message.channel.send(used);
           break;
         case 'man':
-          var man = client.setVar('man', !client.getVar('man'));
+          var man = !getVar('man');
+          setVar('man', man);
           if (man)
-            await client.user.setPresence({
+            await message.client.user.setPresence({
               status: 'idle',
               activity: {
                 name: 'Maintenance!',
                 type: 'WATCHING',
               }
             });
+
           else
-            await client.user.setPresence({
+            await message.client.user.setPresence({
               status: 'online',
               activity: {
                 name: '-help',
@@ -143,12 +152,12 @@ var commandObject = {
           message.channel.send('Fatto!');
           break;
         default:
-          client.commands.get('eval').execute(message, args, client, prefix);
+          message.client.commands.get('eval').execute(message, args, message.client, prefix);
       }
     } catch (err) {
-      client.error(err, message);
+      error(err, message);
     }
-  }
-};
+  })
+  .addAlias('try', 'test');
 
-module.exports = commandObject;
+module.exports = command;

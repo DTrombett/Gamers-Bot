@@ -1,13 +1,17 @@
-const { escapeMarkdown } = require('discord.js');
+const { escapeMarkdown, Message } = require('discord.js');
+const Command = require('../config/Command');
+const error = require('../config/error');
+const findMember = require('../config/findMember');
+const { getMemberVar, resetVar } = require('../config/variables');
 
-var commandObject = {
-  name: 'unmute',
-  description: "Smuta un membro nel server!",
-  help: 'Disattiva il mute ad ad un membro levando il ruolo muted.',
-  usage: ' {@utente | username | ID}',
-  aliases: ['smute'],
-  examples: [' @DTrombett#2000', ' Trombett', ' 597505862449496065'],
-  execute: async (message, args, client, prefix) => {
+const command = new Command('unmute',
+
+  /**
+   * Smuta un membro nel server!
+   * @param {Message} message - The message with the command
+   * @param {Array<String>} args - The args of this message
+   */
+  async function (message, args) {
     try {
       if (!message.member.hasPermission("MANAGE_ROLES"))
         return message.channel.send("Non hai abbastanza permessi per eseguire questa azione!")
@@ -15,9 +19,9 @@ var commandObject = {
       if (!args[0])
         return message.channel.send('Devi specificare il membro da smutare!')
           .catch(console.error);
-      var target = await client.findMember(message, args.join(' '));
+      var target = await findMember(message, args.join(' '));
       if (target === null)
-        return;
+        return null;
       if (!target)
         return message.channel.send("Non ho trovato questo membro!")
           .catch(console.error);
@@ -32,32 +36,36 @@ var commandObject = {
       var has = target.roles.cache.has(muteRole.id);
       if (!target.manageable)
         return has ? message.channel.send('Non ho abbastanza permessi per smutare questo membro!')
-          .catch(console.error) : (client.resetVar('muted', 'member', target), message.channel.send(`**${escapeMarkdown(target.user.tag)}** è stato smutato!`));
+          .catch(console.error) : (resetVar('muted', 'member', target), message.channel.send(`**${escapeMarkdown(target.user.tag)}** è stato smutato!`));
       if (!muteRole)
         return message.channel.send('Non ho trovato il ruolo "Muted"')
           .catch(console.error);
-      if (!has && !client.getMemberVar('muted', target))
+      if (!has && !getMemberVar('muted', target))
         return message.reply("Questo membro non è mutato!")
           .catch(console.error);
       if (!target.user.tag)
-        return client.error('Failed to get target tag.', message) && message.channel.send('Si è verificato un errore!')
+        return error('Failed to get target tag.', message) && message.channel.send('Si è verificato un errore!')
           .catch(console.error);
       var mute;
       if (has)
         mute = await target.roles.remove(muteRole.id)
           .catch(err => {
-            return client.error(err, message);
+            return error(err, message);
           });
       if (!mute && has)
         return message.channel.send('Si è verificato un errore!')
           .catch(console.error);
-      client.resetVar('muted', 'member', target);
+      resetVar('muted', 'member', target);
       return message.channel.send(`**${escapeMarkdown(target.user.tag)}** è stato smutato!`)
         .catch(console.error);
     } catch (err) {
-      client.error(err, message);
+      error(err, message);
     }
-  }
-};
+  })
+  .setDescription("Smuta un membro nel server!")
+  .setHelp('Disattiva il mute ad ad un membro levando il ruolo muted.')
+  .setUsage('{@utente | username | ID}')
+  .addAlias('smute')
+  .addExample(' @DTrombett#2000', ' Trombett', ' 597505862449496065');
 
-module.exports = commandObject;
+module.exports = command;

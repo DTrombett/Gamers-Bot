@@ -1,25 +1,27 @@
 const { escapeMarkdown } = require('discord.js');
+const Command = require('../config/Command');
+const error = require('../config/error');
+const findMember = require('../config/findMember');
+const { getMemberVar, setMemberVar } = require('../config/variables');
 
-var commandObject = {
-  name: 'warn',
-  description: 'Avverti un utente!',
-  help: 'Usa questo comando per avvertire un utente. Gli avvertimenti verranno salvati e potrai successivamente ricontrollarli',
-  usage: ' {@utente | username | ID}',
-  examples: [' @DTrombett#2000', ' Trombett', ' 597505862449496065'],
-  execute: async (message, args, client, prefix) => {
+const command = new Command('warn',
+
+  /**
+   * Avverti un utente!
+   * @param {Message} message - The message with the command
+   * @param {Array<String>} args - The args of this message
+   */
+  async function (message, args) {
     try {
-      if (!message.guild.available)
-        return client.error('Guild is unavailable.', message) && message.channel.send('Si è verificato un errore!')
-          .catch(console.error);
       if (!message.member.hasPermission('MANAGE_MESSAGES'))
         return message.channel.send('Non hai abbastanza permessi per eseguire questa azione!')
           .catch(console.error);
       if (!args[0])
         return message.channel.send('Devi specificare il membro da avvertire!')
           .catch(console.error);
-      var target = await client.findMember(message, args.join(' '));
+      var target = await findMember(message, args.join(' '));
       if (target === null)
-        return;
+        return null;
       if (!target)
         return message.channel.send('Non ho trovato questo membro!')
           .catch(console.error);
@@ -29,21 +31,24 @@ var commandObject = {
       if (target.user.id == message.guild.ownerID || target.hasPermission('ADMINISTRATOR') || target.roles.highest.position >= message.member.roles.highest.position && message.guild.ownerID != message.author.id)
         return message.channel.send("Non hai abbastanza permessi per eseguire questa azione!")
           .catch(console.error);
-      let warn = client.getMemberVar('warn', target);
+      let warn = getMemberVar('warn', target);
       if (warn === undefined)
-        return client.error('Failed to get warns of the user.', message) && message.channel.send('Si è verificato un errore!')
+        return error('Failed to get warns of the user.', message) && message.channel.send('Si è verificato un errore!')
           .catch(console.error);
-      warn = client.setMemberVar('warn', warn + 1, target);
+      warn = setMemberVar('warn', warn + 1, target);
       if (!warn)
-        return client.error('Failed to warn the user.', message) && message.channel.send('Si è verificato un errore!')
+        return error('Failed to warn the user.', message) && message.channel.send('Si è verificato un errore!')
           .catch(console.error);
       var a = warn == 1 ? 'avvertimento' : 'avvertimenti';
       return message.channel.send(`Ho avvertito **${escapeMarkdown(target.user.tag)}**! Ora ha **${warn}** ${a}.`)
         .catch(console.error);
     } catch (err) {
-      client.error(err, message);
+      error(err, message);
     }
-  }
-};
+  })
+  .setDescription('Avverti un utente!')
+  .setHelp('Usa questo comando per avvertire un utente. Gli avvertimenti verranno salvati e potrai successivamente ricontrollarli')
+  .setUsage('{@utente | username | ID}')
+  .addExample(' @DTrombett#2000', ' Trombett', ' 597505862449496065');
 
-module.exports = commandObject;
+module.exports = command;

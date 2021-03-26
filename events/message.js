@@ -1,31 +1,27 @@
-const normalize = require('normalize-strings');
-const execute = require("../config/execute.js");
 const automod = require('../config/auto-mod.js');
+const { Message } = require('discord.js');
+const { getVar } = require('../config/variables.js');
+const botUtil = require('../config/botUtil.js');
+const error = require('../config/error.js');
 
+/**
+ * Emitted whenever a message is created.
+ * @param {Message} message - The created message
+ */
 module.exports = (message) => {
-  var client = message.client;
-  try {
-    if (!message.author || !message.member || message.author.bot || (client.getVar('man') && message.author.id != '597505862449496065'))
-      return;
-    var value, prefix = client.getIDVar('prefix', message.guild.id);
-    if (prefix.some(p => {
-      if (value)
-        return;
-      if (message.content.startsWith(p)) {
-        value = p;
-        return true;
-      }
-    })) {
-      let args = message.content.slice(value.length).trim().split(/ +/);
-      let command = normalize(args.shift().toLowerCase());
-      command = client.commands.has(command) ? client.commands.get(command) : client.commands.find(c => {
-        return c.aliases.includes(command);
-      });
-      if (command)
-        execute(message, command, args, client, value);
+    try {
+        if (!message.author || !message.guild || (getVar('man') && message.author.id !== '597505862449496065')) return;
+        if (message.author.bot) return botUtil(message);
+        if (!message.member) return;
+        const prefix = message.prefix;
+        if (prefix) {
+            const command = message.command;
+            const args = message.args;
+            args.shift();
+            if (command) command.execute(message, args, prefix);
+        }
+        automod(message);
+    } catch (err) {
+        error(err, message);
     }
-    automod(message, client, value);
-  } catch (err) {
-    client.error(err, message);
-  }
 }

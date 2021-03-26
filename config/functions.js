@@ -1,5 +1,4 @@
 const { MessageEmbed, Guild } = require('discord.js');
-const { scheduleJob } = require('node-schedule');
 
 Guild.prototype.logChannel = function () {
   var channels = this.channels.cache.array();
@@ -7,45 +6,30 @@ Guild.prototype.logChannel = function () {
   return channel;
 };
 
-module.exports = (client) => {
+client.postStatus = (embeds) => {
+  var options = { 'username': client.user.username, 'avatarURL': client.customAvatar, 'embeds': embeds };
+  client.webhook.send(options)
+    .catch(err => {
+      return client.error(err, embeds);
+    });
+};
 
-  scheduleJob('1 0 * * *', () => {
-    client.resetVar('ban', 'all');
-    let channel = client.channels.cache.get('786270849006567454');
-    channel.send('Resetted all the bans');
-  });
-
-  scheduleJob('1 12 * * *', () => {
-    client.resetVar('ban', 'all');
-    let channel = client.channels.cache.get('786270849006567454');
-    channel.send('Resetted all the bans');
-  });
-
-  client.postStatus = (embeds) => {
-    var options = { 'username': client.user.username, 'avatarURL': client.customAvatar, 'embeds': embeds };
-    client.webhook.send(options)
-      .catch(err => {
-        return client.error(err, embeds);
-      });
-  };
-
-  client.embedLog = (event, url, user, content, guild) => {
-    const options = { format: 'png', dynamic: true, size: 4096 };
-    if (!user) {
-      user = {};
-      user.tag = 'UNKNOWN';
-      user.displayAvatarURL = () => {
-        return guild.iconURL(options);
-      };
-    }
-    const embed = new MessageEmbed()
-      .setColor('RED')
-      .setTitle(event)
-      .setURL(url)
-      .setAuthor(user.tag, user.displayAvatarURL(options), user.displayAvatarURL(options))
-      .setDescription(content)
-      .setThumbnail(guild.iconURL(options))
-      .setTimestamp();
-    return embed;
-  };
+client.embedLog = (event, url, user, content, guild) => {
+  const options = { format: 'png', dynamic: true, size: 4096 };
+  if (!user) {
+    user = {};
+    user.tag = 'UNKNOWN';
+    user.displayAvatarURL = () => {
+      return guild.iconURL(options);
+    };
+  }
+  const embed = new MessageEmbed()
+    .setColor('RED')
+    .setTitle(event)
+    .setURL(url)
+    .setAuthor(user.tag, user.displayAvatarURL(options), user.displayAvatarURL(options))
+    .setDescription(content)
+    .setThumbnail(guild.iconURL(options))
+    .setTimestamp();
+  return embed;
 };

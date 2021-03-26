@@ -1,15 +1,14 @@
-const { escapeMarkdown } = require('discord.js');
+const { escapeMarkdown, Message, Client } = require('discord.js');
 const compareFunction = require('./compareFunction');
 const normalize = require('./normalize');
 
+/**
+ * @param {Message} message 
+ * @param {String} text 
+ * @param {Boolean} author 
+ * @param {Client} client 
+ */
 module.exports = async (message, text, author, client) => {
-
-  /**
-   * findMember function
-   * Author: DTrombett
-   * Version: 4.0
-   */
-
   if (client && client.cooldown && client.cooldown.has(message.author.id)) {
     message.reply('Per favore, rispondi prima all\'ultimo comando o annullalo scrivendo 0').then(msg => {
       return msg.delete({ timeout: 10000 });
@@ -18,9 +17,9 @@ module.exports = async (message, text, author, client) => {
       .catch(console.error);
     return null;
   }
-  if (!message || !message.guild || !message.guild.available) return;
+  if (!message || !message.guild) return null;
   if (!text && author) return message.member;
-  if (!text) return;
+  if (!text) return null;
   if (!isNaN(text) && text.length >= 17) {
     if (message.guild.members.cache.has(text)) return message.guild.members.cache.get(text);
     else if (client)
@@ -47,7 +46,7 @@ module.exports = async (message, text, author, client) => {
     return normalize(u.user.tag) == text;
   });
   if (!Array.isArray(member) && (member != message.member || author)) return member;
-  if (!Array.isArray(member)) return;
+  if (!Array.isArray(member)) return null;
   var n = 0;
   for (let m of members.filter(u => {
     return normalize(u.user.username) == text;
@@ -103,7 +102,7 @@ module.exports = async (message, text, author, client) => {
     if (n == 2) break;
     else member.push(m) && n++;
   n = 0;
-  if (!member[0]) return;
+  if (!member[0]) return null;
   else if (member.length == 1) return message.guild.members.cache.has(member[0].id) ? message.guild.members.cache.get(member[0].id) : member[0];
   member.sort(compareFunction);
   var msg = [], i = 1, ids = [];
@@ -128,9 +127,12 @@ module.exports = async (message, text, author, client) => {
     .then(collected => {
       if (collected.first().content == '0') {
         message.channel.send('Comando cancellato!')
-          .then(s => {
-            return s.delete({ timeout: 10000 })
-              .catch(console.error);
+          .then(async s => {
+            try {
+              return s.delete({ timeout: 10000 });
+            } catch (message) {
+              return console.error(message);
+            }
           })
           .catch(console.error);
         message.delete()
@@ -139,7 +141,7 @@ module.exports = async (message, text, author, client) => {
           .catch(console.error);
         collected.first().delete()
           .catch(console.error);
-        return;
+        return null;
       }
       member = member[collected.first().content - 1];
       sent.delete()
@@ -150,9 +152,12 @@ module.exports = async (message, text, author, client) => {
     .catch(err => {
       console.log(err);
       message.reply('Non hai inserito una risposta, comando cancellato!')
-        .then(msg => {
-          return msg.delete({ timeout: 10000 })
-            .catch(console.error);
+        .then(async msg => {
+          try {
+            return msg.delete({ timeout: 10000 });
+          } catch (message) {
+            return console.error(message);
+          }
         })
         .catch(console.error);
       sent.delete()

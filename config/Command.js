@@ -1,5 +1,6 @@
-const { Collection, Message } = require('discord.js');
+const { Collection, Message, TextChannel } = require('discord.js');
 const ms = require('ms');
+const error = require('./error');
 
 /**
  * Represents a command of the bot.
@@ -9,16 +10,14 @@ class Command {
      * @param {String} name The name of this command
      * @param {Function} [callback] The callback to execute when this command is called
      */
-    constructor(name, callback = () => { }) {
+    constructor(name, callback = function () { }) {
         /**
          * Name of the command
-         * @type {String}
          */
         this.name = name;
 
         /**
          * The callback of the command
-         * @type {Function}
          */
         this.callback = callback;
 
@@ -30,7 +29,6 @@ class Command {
 
         /**
          * The cooldown in milliseconds of the command
-         * @type {Number}
          */
         this.time = 1000;
 
@@ -48,37 +46,27 @@ class Command {
 
         /**
          * Users in cooldown
-         * @type {Collection<Snowflake, Message>}
+         * @type Collection<Snowflake, Message>
          */
         this.cooldown = new Collection();
 
         /**
-         * A Collection with number of uses for every user
-         * @type {Collection<Snowflake, Number>}
-         */
-        this.uses = new Collection();
-
-        /**
          * The help message for this command
-         * @type {String}
          */
         this.help = '';
 
         /**
          * The usage of this command
-         * @type {String}
          */
         this.usage = '';
 
         /**
          * Aliases for the command
-         * @type {Array}
          */
         this.aliases = [];
 
         /**
          * Example of this command
-         * @type {Array}
          */
         this.examples = [];
     }
@@ -86,7 +74,7 @@ class Command {
     /**
      * Add new aliases for this command.
      * @param  {...String} args - Aliases to add
-     * @returns {Command} The new Command
+     * @returns The new Command
      * @example
      * // Add the alias "test"
      * command.addAlias('test');
@@ -103,21 +91,21 @@ class Command {
     /**
      * Add examples of the command.
      * @param  {...String} args - Examples to add without command name
-     * @returns {Command} The new Command
+     * @returns The new Command
      * @example
      * // Add an example to the command
      * command.addExample("Hello world!");
      */
     addExample(...args) {
         args = args.map(arg => arg.toString());
-        Array.isArray(this.examples) ? args.forEach(ex => this.examples.push(this.name + ex)) : this.examples = args.map(t => `${this.name} ${t}`);
+        Array.isArray(this.examples) ? args.forEach(ex => this.examples.push(this.name + ex)) : this.examples = args.map(t => `${this.name}${t}`);
         return this;
     }
 
     /**
      * Add a description to the command, it will be shown in the help command.
      * @param  {String} description - A short description of the command
-     * @returns {Command} The new Command
+     * @returns The new Command
      * @example
      * command.setDescription("Hello world!");
      */
@@ -130,7 +118,7 @@ class Command {
     /**
      * Add a cooldown to the command.
      * @param  {Number} time - The cooldown for every user in milliseconds
-     * @returns {Command} The new Command
+     * @returns The new Command
      * @example
      * // Set the cooldown to 2 seconds
      * command.setCooldown(2000);
@@ -145,7 +133,7 @@ class Command {
     /**
      * Add an help message for this command.
      * @param  {String} message - A detailed help message
-     * @returns {Command} The new Command
+     * @returns The new Command
      * @example
      * // Set a new help message
      * command.setHelp("This is a detailed description of the command.");
@@ -159,15 +147,45 @@ class Command {
     /**
      * Add info about the usage of this command.
      * @param  {String} usage - The info without command name
-     * @returns {Command} The new Command
+     * @returns The new Command
      * @example
      * // Set a new usage of the command
      * command.setUsage("{user}");
      */
     setUsage(usage) {
         usage = usage.toString();
-        this.usage = usage;
+        this.usage = ` ${usage}`;
         return this;
+    }
+
+    /**
+     * Send a message to the user if the usage of the command is wrong.
+     * @param {TextChannel} channel - The channel where the bot will send the message
+     * @param {String} prefix - The prefix used
+     * @returns The message sent by the bot
+     */
+    async wrongUsage(channel, prefix) {
+        try {
+            return channel.send(`Attenzione! Usa così il comando: \`${prefix}${this.name}${this.usage}\`\nSe hai ancora dubbi su come utilizzare questo comando usa \`${prefix}help ${this.name}\``);
+        } catch (message) {
+            return console.error(message);
+        }
+    }
+
+    /**
+     * Send a message to the user if an unexpected error occurred.
+     * @param {Message} message - The user message with the command
+     * @param {String} prefix - The prefix used
+     * @param {Error|String} err - The error occurred
+     * @returns The message sent by the bot
+     */
+    async failed(message, prefix, err) {
+        error(err, message);
+        try {
+            return message.channel.send(`Si è verificato un errore! Se hai dubbi su come utilizzare questo comando usa \`${prefix}help ${this.name}\`\nPensi invece sia un  problema del bot? Faccelo sapere tramite il comando \`${prefix}bug\``);
+        } catch (message_1) {
+            return console.error(message_1);
+        }
     }
 
     /**
@@ -181,19 +199,22 @@ class Command {
         let permissions = message.channel.permissionsFor(message.guild.me);
         if (!permissions || !permissions.has('SEND_MESSAGES')) return null;
         let msg = this.cooldown.get(message.author.id);
+        var time;
         if (msg) {
-            var time = this.time - (message.createdTimestamp - msg.createdTimestamp);
+            time = this.time - (message.createdTimestamp - msg.createdTimestamp);
             if (this.cooldown <= 1000 || time <= 500) return null;
             time = ms(time);
             if (!time) return null;
             message.channel.send(`Ehy ${msg.author}, attendi ancora **${time}** prima di poter riutilizzare questo comando.`);
             return null;
         }
-        var uses = this.uses.get(message.author.id);
-        if (!uses) (uses = 0, this.uses.set(message.author.id, 0));
-        uses++;
+        if (prefix.includes(message.client.user.id)) prefix = '+';
+        var response = this.callback(message, args, prefix);
+        this.cooldown.set(message.author.id, message);
+        time = this.time - (Date.now() - message.createdTimestamp);
+        setTimeout(() => this.cooldown.delete(message.author.id), time)
         console.info(`${message.author.tag} (${message.author.id}) executed the command ${this.name} in channel ${message.channel.name} (${message.channel.id}) in guild ${message.guild.name} (${message.guild.id}).`);
-        return await this.callback(message, args, prefix);
+        return await response;
     }
 };
 

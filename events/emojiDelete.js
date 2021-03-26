@@ -1,24 +1,30 @@
-module.exports = async (emoji, client) => {
+const { Message, GuildEmoji } = require("discord.js");
+const createEmbedLog = require("../config/createEmbedLog");
+const error = require("../config/error");
+
+/**
+ * Emitted whenever a custom emoji is deleted in a guild.
+ * @param {GuildEmoji} emoji - The emoji that was deleted
+ * @returns {Promise<Message>} The message sent in log channel
+ */
+module.exports = async (emoji) => {
   try {
-    var log = emoji.guild.logChannel();
+    var log = emoji.client.channels.cache.get('786270849006567454');
     const fetchedLogs = await emoji.guild.fetchAuditLogs({
       limit: 1,
       type: 'EMOJI_DELETE',
     });
-    const deletionLog = fetchedLogs.entries.first();
-    var executor;
-    var target;
-    var mod;
-    if (deletionLog) {
-      target = deletionLog.target;
-      executor = deletionLog.executor;
+    var logs = fetchedLogs.entries.first(), executor, target, mod;
+    if (logs) {
+      target = logs.target;
+      executor = logs.executor;
     }
     if (target.id === emoji.id) mod = executor;
     var content = `[:${emoji.name}:](${emoji.url})`;
-    const embed = client.embedLog(`Emoji eliminata`, emoji.url, mod, content, emoji.guild)
+    const embed = createEmbedLog(`Emoji eliminata`, emoji.url, mod, content, emoji.guild)
       .setFooter(`ID: ${emoji.id}`);
-    log.send(embed);
+    return log.send(embed);
   } catch (err) {
-    client.error(err, emoji);
+    error(err, emoji);
   }
 }

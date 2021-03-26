@@ -1,13 +1,17 @@
-const canvas = require("canvacord");
-const { MessageAttachment } = require('discord.js');
+const { Welcomer } = require("canvacord");
+const { MessageAttachment, GuildMember, Message } = require('discord.js');
 
-module.exports = async (member, client) => {
+/**
+ * Emitted whenever a user joins a guild.
+ * @param {GuildMember} member The member that has joined a guild
+ * @returns {?Promise<Message>} The message sent in welcome channel
+ */
+module.exports = async (member) => {
   try {
     if (member.guild.id != '722882956472877076')
-      return;
+      return null;
     var channel = member.guild.channels.cache.get('785171652001660939');
-    const welcome = new canvas.Welcomer();
-    let image = await welcome
+    var image = await new Welcomer()
       .setUsername(member.user.username)
       .setDiscriminator(member.user.discriminator)
       .setMemberCount(member.guild.members.cache.size)
@@ -32,7 +36,7 @@ module.exports = async (member, client) => {
       .setText("member-count", "Ora siamo " + member.guild.members.cache.size.toString())
       .toAttachment();
     let attachment = new MessageAttachment(image.toBuffer(), "welcome.png");
-    channel.send(attachment);
+    return channel.send(attachment);
   } catch (err) {
     client.error(err, member);
   }

@@ -1,24 +1,20 @@
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed, Message } = require('discord.js');
+const Command = require('../config/Command');
+const error = require('../config/error');
+const findMember = require('../config/findMember');
 
-var commandObject = {
-  name: 'avatar',
-  description: "Guarda l'avatar di un utente!",
-  help: 'Usa questo comando per visualizzare l\'avatar di qualsiasi utente tramite l\'ID, username o menzione!',
-  usage: ' (@utente | username | ID )',
-  aliases: ['pfp'],
-  examples: ['', ' @DTrombett#2000', ' Trombett', ' 597505862449496065'],
-  time: 2000,
-  execute: async (message, args, client, prefix) => {
+const command = new Command('avatar',
+
+  /**
+   * Guarda l'avatar di un utente!
+   * @param {Message} message - The message with the command
+   * @param {Array<String>} args - The args of this message
+   */
+  async function (message, args) {
     try {
-      if (!message.author.tag)
-        return client.error('Author tag undefined.', message) && message.channel.send('Si è verificato un errore!')
-          .catch(console.error);
-      if (!message.guild.available)
-        return client.error('Guild unavailable.', message) && message.channel.send('Si è verificato un errore!')
-          .catch(console.error);
-      var member = await client.findMember(message, args.join(' '), true, client);
+      var member = await findMember(message, args.join(' '), true, message.client);
       if (member === null)
-        return;
+        return null;
       if (!member)
         return message.channel.send('Non ho trovato nessun utente!')
           .catch(console.error);
@@ -31,7 +27,7 @@ var commandObject = {
       var color = member.displayHexColor || message.guild.roles.highest.color;
       let name = member.displayName || user.username;
       if (!name || !color || !avatar)
-        return client.error('Content failed to load.', message) && message.channel.send('Si è verificato un errore!')
+        return error('Content failed to load.', message) && message.channel.send('Si è verificato un errore!')
           .catch(console.error);
       const avatarEmbed = new MessageEmbed()
         .setColor(color)
@@ -42,9 +38,14 @@ var commandObject = {
       return message.channel.send(avatarEmbed)
         .catch(console.error);
     } catch (err) {
-      client.error(err, message);
+      error(err, message);
     }
-  }
-};
+  })
+  .setDescription("Guarda l'avatar di un utente!")
+  .setHelp('Usa questo comando per visualizzare l\'avatar di qualsiasi utente tramite l\'ID, username o menzione!')
+  .setUsage('(@utente | username | ID )')
+  .addAlias('pfp')
+  .addExample('', ' @DTrombett#2000', ' Trombett', ' 597505862449496065')
+  .setCooldown(2000);
 
-module.exports = commandObject;
+module.exports = command;

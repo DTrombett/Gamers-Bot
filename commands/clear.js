@@ -1,12 +1,15 @@
-var commandObject = {
-  name: 'clear',
-  description: "Cancella dei messaggi nella chat!",
-  help: 'Usa questo comando per cancellare dei messaggi nella chat. Solo i moderatori possono utilizzare questo comando.',
-  usage: ' {numero}',
-  examples: [' 15', ' 100'],
-  aliases: ['purge', 'prune'],
-  time: 2000,
-  execute: async (message, args, client, prefix) => {
+const { Message } = require("discord.js");
+const Command = require("../config/Command");
+const error = require("../config/error");
+
+const command = new Command('clear',
+
+  /**
+   * Cancella dei messaggi nella chat!
+   * @param {Message} message - The message with the command
+   * @param {Array<String>} args - The args of this message
+   */
+  async function (message, args) {
     try {
       let perms = message.channel.permissionsFor(message.member);
       if (!perms || !perms.has('MANAGE_MESSAGES'))
@@ -29,14 +32,14 @@ var commandObject = {
       var count = 0;
       let msgs = await message.channel.bulkDelete(args[0], true)
         .catch(err => {
-          return client.error(err, message) && message.channel.send('Non ho abbastanza permessi per effettuare questa azione!')
+          return error(err, message) && message.channel.send('Non ho abbastanza permessi per effettuare questa azione!')
             .catch(console.error);
         });
       if (!msgs)
-        return;
+        return null;
       var count = msgs.size;
       if (!count)
-        return client.error('Failed to get messages size.', message) && message.channel.send('Si è verificato un errore!')
+        return error('Failed to get messages size.', message) && message.channel.send('Si è verificato un errore!')
           .catch(console.error);
       return message.reply('Ho cancellato con successo ' + count + ' messaggi!')
         .then(msg => {
@@ -45,9 +48,14 @@ var commandObject = {
         })
         .catch(console.error);
     } catch (err) {
-      client.error(err, message);
+      error(err, message);
     }
-  }
-};
+  })
+  .setDescription("Cancella dei messaggi nella chat!")
+  .setHelp('Usa questo comando per cancellare dei messaggi nella chat. Solo i moderatori possono utilizzare questo comando.')
+  .setUsage('{numero}')
+  .addExample(' 15', ' 100')
+  .addAlias('purge', 'prune')
+  .setCooldown(2000);
 
-module.exports = commandObject;
+module.exports = command;

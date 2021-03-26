@@ -1,13 +1,16 @@
+const { Message } = require('discord.js');
 const ms = require('ms');
+const Command = require('../config/Command');
+const error = require('../config/error');
 
-var commandObject = {
-  name: 'slowmode',
-  description: 'Modifica la slowmode del canale!',
-  help: 'Usa questo comando per attivare, disattivare o modificare la slowmode nel canale.',
-  usage: ' (tempo)',
-  aliases: ['set-slowmode', 'slow'],
-  examples: [' ', '5m'],
-  execute: async (message, args, client, prefix) => {
+const command = new Command('slowmode',
+
+  /**
+   * Modifica la slowmode del canale!
+   * @param {Message} message - The message with the command
+   * @param {Array<String>} args - The args of this message
+   */
+  async function (message, args) {
     try {
       let perms = message.channel.permissionsFor(message.member);
       if (!perms || !perms.has('MANAGE_CHANNELS'))
@@ -25,7 +28,7 @@ var commandObject = {
             .catch(console.error);
         let form = ms(mill);
         if (!form)
-          return client.error('Failed to convert milliseconds.', message) && message.channel.send('Si è verificato un errore!')
+          return error('Failed to convert milliseconds.', message) && message.channel.send('Si è verificato un errore!')
             .catch(console.error);
         msg = mill !== 0 ? `Ok! Ho impostato la slowmode a ${form}.` : `Ok! Ho disattivato la slowmode nel canale.`;
         args.shift();
@@ -40,7 +43,7 @@ var commandObject = {
       }
       let ch = await message.channel.setRateLimitPerUser(seconds || 0, reason || `Changed by ${message.author.tag}`)
         .catch(err => {
-          return client.error(err, message);
+          return error(err, message);
         });
       if (!ch)
         return message.channel.send('Si è verificato un errore!')
@@ -48,9 +51,13 @@ var commandObject = {
       return message.channel.send(msg || 'Ok! Ho modificato la slowmode del canale.')
         .catch(console.error);
     } catch (err) {
-      client.error(err, message);
+      error(err, message);
     }
-  }
-};
+  })
+  .setDescription('Modifica la slowmode del canale!')
+  .setHelp('Usa questo comando per attivare, disattivare o modificare la slowmode nel canale.')
+  .setUsage('(tempo)')
+  .addAlias('set-slowmode', 'slow')
+  .addExample(' ', '5m');
 
-module.exports = commandObject;
+module.exports = command;

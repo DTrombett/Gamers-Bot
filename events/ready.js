@@ -1,25 +1,18 @@
-const { MessageEmbed, WebhookClient } = require('discord.js');
+const { scheduleJob } = require("node-schedule");
+const { client } = require("..");
+const { setCursedWords } = require("../config/cursedWords");
+const gitHubApi = require("../config/gitHubApi");
+const fetchCovidData = require("./fetchCovidData");
 
-module.exports = (client, id, guilds) => {
-  try {
-    console.log(`Shard ${id} ready with ${!!guilds ? guilds.size : 0} guilds unavailable.`);
-    client.customAvatar = client.user.displayAvatarURL({ format: 'png', dynamic: true, size: 4096 });
-    client.webhook = new WebhookClient('810879034241974353', process.env.WEBHOOK_TOKEN);
-    client.error = require('../config/error.js');
-    require('../config/functions.js')(client);
-    require('../config/variables.js')(client);
-    client.findMember = require('../config/findMember.js');
-    require('../config/Util.js');
-    var emb = new MessageEmbed()
-      .setAuthor(`Shard ${id}`, client.customAvatar, client.customAvatar)
-      .setTitle('STATUS')
-      .setFooter('Made by DTrombett')
-      .setTimestamp()
-      .setThumbnail(client.customAvatar)
-      .setColor('GREEN')
-      .addField('Ready', 'Bot is online! ' + `${!!guilds ? guilds.size : 0} guilds are unavailable.`);
-    client.postStatus([emb]);
-  } catch (err) {
-    console.error(err);
-  }
+module.exports = async () => {
+    try {
+        console.log(`Logged in as ${client.user.tag}`);
+        gitHubApi('repos/web-mech/badwords/contents/lib/lang.json')
+            .then(({ content }) => setCursedWords(JSON.parse(Buffer.from(content, 'base64').toString()).words))
+            .catch(console.error);
+        fetchCovidData();
+        scheduleJob('0 18 * * *', fetchCovidData);
+    } catch (err) {
+        console.error(err);
+    }
 }

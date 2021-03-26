@@ -1,32 +1,34 @@
-module.exports = async (message, client) => {
+const { Message } = require("discord.js");
+const createEmbedLog = require("../config/createEmbedLog");
+const error = require("../config/error");
+
+/**
+ * Emitted whenever a message is deleted.
+ * @param {Message} message - The deleted message
+ * @returns {?Promise<Message>} - The message sent in log channel
+ */
+module.exports = async (message) => {
   try {
-    if (!message.guild || !message.member || !message.author || message.author.bot || message.channel.name.includes('admin'))
-      return;
-    var date = Date.now();
+    if (message.partial || !message.guild || !message.member || !message.author || message.author.bot)
+      return null;
     const fetchedLogs = await message.guild.fetchAuditLogs({
       limit: 1,
       type: 'MESSAGE_DELETE',
-    });
-    const deletionLog = fetchedLogs.entries.first();
-    var executor, target, mod;
-    if (deletionLog) {
-      target = deletionLog.target;
-      executor = deletionLog.executor;
-    }
-    if (target.id === message.author.id && date - deletionLog < 1000)
-      mod = executor.tag;
-    const channel = message.guild.logChannel();
-    var content = message.content;
+    })
+      .catch(console.error);
+    var deletionLog = fetchedLogs.entries.first(), executor;
+    if (!!deletionLog && deletionLog.target.id === message.author.id) executor = deletionLog.executor;
+    const channel = message.client.channels.cache.get('786270849006567454');
     var attachments = message.attachments.array();
-    const embed = client.embedLog('Messaggio cancellato!', `https://discord.com/channels/${message.guild.id}/${message.channel.id}`, message.author, content, message.guild)
-      .setFooter(`Canale: #${message.channel.name} `);
-    if (mod)
-      embed.addField('Executor', mod);
+    const embed = createEmbedLog('Messaggio cancellato!', `https://discord.com/channels/${message.guild.id}/${message.channel.id}`, message.author, message.content, message.guild)
+      .setFooter(`ID: ${message.id} | Canale: #${message.channel.name} `);
+    if (executor)
+      embed.addField('Executor', executor.tag);
     if (attachments[0])
       for (let att of attachments)
         embed.addField(`Attachment - ${att.name}`, att.proxyURL);
-    channel.send(embed);
+    return channel.send(embed);
   } catch (err) {
-    client.error(err, message);
+    error(err, message);
   }
 }

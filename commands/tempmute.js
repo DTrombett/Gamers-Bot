@@ -1,18 +1,19 @@
 const ms = require('ms');
-const { escapeMarkdown } = require('discord.js');
+const { escapeMarkdown, Message } = require('discord.js');
+const Command = require('../config/Command');
+const { getMemberVar, setMemberVar, resetVar } = require('../config/variables');
+const findMember = require('../config/findMember');
+const error = require('../config/error');
 
-var commandObject = {
-  name: 'tempmute',
-  description: "Silenzia un membro nel server per un periodo di tempo!",
-  help: 'Silenzia un membro assegnandogli il ruolo muted in modo che non possa più scrivere per un certo periodo di tempo. Il membro potrà comunque scrivere se i permessi per i ruoli non sono impostati correttamente.',
-  usage: ' {@utente | username | ID} {tempo}',
-  aliases: ['temp'],
-  examples: ['@DTrombett#2000 5m', ' Trombett 2h', ' 597505862449496065 40m'],
-  execute: async (message, args, client, prefix) => {
+const command = new Command('tempmute',
+
+  /**
+   * Silenzia un membro nel server per un periodo di tempo!
+   * @param {Message} message - The message with the command
+   * @param {Array<String>} args - The args of this message
+   */
+  async function (message, args) {
     try {
-      if (!message.guild.available)
-        return client.error('Guild is unavailable.', message) && message.channel.send('Si è verificato un errore!')
-          .catch(console.error);
       if (!args[1])
         return message.channel.send('Devi specificare il membro da mutare!')
           .catch(console.error);
@@ -24,9 +25,9 @@ var commandObject = {
           .catch(console.error);
       if (!ms(time))
         return message.channel.send("Devi scrivere la durata del mute!");
-      var target = await client.findMember(message, args.join(' '));
+      var target = await findMember(message, args.join(' '));
       if (target === null)
-        return;
+        return null;
       if (!target)
         return message.channel.send("Non ho trovato questo membro!")
           .catch(console.error);
@@ -37,8 +38,8 @@ var commandObject = {
         return message.channel.send("Non hai abbastanza permessi per eseguire questa azione!")
           .catch(console.error);
       if (!target.manageable)
-        return (client.setMemberVar('muted', true, target), setTimeout(() => {
-          client.resetVar('muted', 'member', target);
+        return (setMemberVar('muted', true, target), setTimeout(() => {
+          resetVar('muted', 'member', target);
         }, ms(time)), message.channel.send('Non ho abbastanza permessi per assegnare il ruolo mutato a questo membro ma cancellerò manualmente i messaggi inviati da lui nel server se possibile!')
           .catch(console.error));
       let muteRole = message.guild.roles.cache.find(rr => {
@@ -51,37 +52,41 @@ var commandObject = {
           .catch(console.error);
       if (target.roles.cache.find(r => {
         return r.name == "Muted";
-      }) || client.getMemberVar('muted', target))
+      }) || getMemberVar('muted', target))
         return message.reply("Questo membro è già mutato!")
           .catch(console.error);
       let formal = ms(ms(time));
       if (!target.user.tag)
-        return client.error('Failed to get target tag.', message) && message.channel.send('Si è verificato un errore!')
+        return error('Failed to get target tag.', message) && message.channel.send('Si è verificato un errore!')
           .catch(console.error);
       if (!formal)
-        return client.error('Failed to convert time.', message) && message.channel.send('Si è verificato un errore!')
+        return error('Failed to convert time.', message) && message.channel.send('Si è verificato un errore!')
           .catch(console.error);
       let m = target.roles.add(muteRole.id)
         .catch(err => {
-          return (client.error(err, message), message.channel.send('Si è verificato un errore e non ho potuto assegnare il ruolo all\'utente ma cancellerò manualmente i messaggi inviati da lui nel server se possibile!')
+          return (error(err, message), message.channel.send('Si è verificato un errore e non ho potuto assegnare il ruolo all\'utente ma cancellerò manualmente i messaggi inviati da lui nel server se possibile!')
             .catch(console.error));
         });
       if (!m)
-        return (setTimeout(() => {
-          client.resetVar('muted', 'member', target);
-        }, ms(time)), client.setMemberVar('muted', true, target));
-      client.setMemberVar('muted', true, target);
+        return (message.client.setTimeout(() => {
+          resetVar('muted', 'member', target);
+        }, ms(time)), setMemberVar('muted', true, target));
+      setMemberVar('muted', true, target);
       message.channel.send(`**${escapeMarkdown(target.user.tag)}** è stato mutato per ${formal}`)
         .catch(console.error);
-      return setTimeout(() => {
-        client.resetVar('muted', 'member', target);
+      return message.client.setTimeout(() => {
+        resetVar('muted', 'member', target);
         target.roles.remove(muteRole.id)
           .catch(console.error);
       }, ms(time));
-    } catch (error) {
-      client.error(error, message);
+    } catch (err) {
+      error(err, message);
     }
-  }
-};
+  })
+  .setDescription("Silenzia un membro nel server per un periodo di tempo!")
+  .setHelp('Silenzia un membro assegnandogli il ruolo muted in modo che non possa più scrivere per un certo periodo di tempo.')
+  .setUsage('{@utente | username | ID} {tempo}')
+  .addAlias('temp')
+  .addExample('@DTrombett#2000 5m', ' Trombett 2h', ' 597505862449496065 40m');
 
-module.exports = commandObject;
+module.exports = command;

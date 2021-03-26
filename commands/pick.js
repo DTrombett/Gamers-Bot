@@ -1,21 +1,25 @@
-var commandObject = {
-  name: 'pick',
-  description: 'Lancia il dado... e prendi un numero random!',
-  help: 'Mostra un numero casuale tra 1 e 100 o un intervallo scelto da te!',
-  usage: ' (max | min) (max)',
-  examples: ['', ' 10', '10 100'],
-  aliases: ['dice', 'roll'],
-  execute: async (message, args, client, prefix) => {
+const { Message } = require("discord.js");
+const Command = require("../config/Command");
+const error = require("../config/error");
+
+const command = new Command('pick',
+
+  /**
+   * Lancia il dado... e prendi un numero random!
+   * @param {Message} message - The message with the command
+   * @param {Array<String>} args - The args of this message
+   */
+  async function (message, args) {
     try {
       if (!!args[0] && isNaN(args[0]) || !!args[1] && isNaN(args[1]))
         return message.channel.send('Non hai inserito un numero valido!')
           .catch(console.error);
       var sent = await message.channel.send('Sto tirando il dado...')
         .catch(err => {
-          return client.error(err, message);
+          return error(err, message);
         });
       if (!sent)
-        return;
+        return null;
       var random;
       if (!args[0]) {
         random = Math.floor(Math.random() * 101);
@@ -34,9 +38,13 @@ var commandObject = {
           .catch(console.error);
       }, 800);
     } catch (err) {
-      client.error(err, message);
+      error(err, message);
     }
-  }
-};
+  })
+  .setDescription('Lancia il dado... e prendi un numero random!')
+  .setHelp('Mostra un numero casuale tra 1 e 100 o un intervallo scelto da te!')
+  .setUsage('(max | min) (max)')
+  .addExample('', ' 10', '10 100')
+  .addAlias('dice', 'roll');
 
-module.exports = commandObject;
+module.exports = command;

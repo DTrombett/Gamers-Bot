@@ -1,23 +1,26 @@
-const { Collection, MessageEmbed } = require('discord.js');
+const { Collection, MessageEmbed, Message } = require('discord.js');
 const normalize = require('normalize-strings');
 const ms = require('ms');
 const helpEmbed = require('../config/helpEmbed');
+const Command = require('../config/Command');
+const error = require('../config/error');
 
-var commandObject = {
-  name: 'help',
-  description: "Mostra questo messaggio con tutti i miei comandi!",
-  help: 'Mostra tutti i comandi del bot o delle informazioni riguardo un comando in particolare!',
-  usage: ' (comando)',
-  examples: ['', ' avatar'],
-  aliases: ['h', 'aiuto', 'comandi', 'commands'],
-  time: 5000,
-  execute: async (message, args, client, prefix) => {
+const command = new Command('help',
+
+  /**
+   * Mostra un messaggio con tutti i comandi!
+   * @param {Message} message - The message with the command
+   * @param {Array<String>} args - The args of this message
+   * @param {String} prefix - The prefix used in the message
+   */
+  async function (message, args, prefix) {
     try {
       message.delete()
         .catch(console.error);
-      var validCommands = client.commands.filter(c => {
+      var validCommands = message.client.commands.filter(c => {
         return !!c.description;
       });
+      var customClientAvatar = customClientAvatar;
       if (args[0]) {
         var command = normalize(args[0]).toLowerCase();
         command = validCommands.get(command) || validCommands.find(c => {
@@ -28,8 +31,8 @@ var commandObject = {
             .catch(console.error);
         var commandHelp = new MessageEmbed()
           .setColor('RED')
-          .setThumbnail(client.customAvatar)
-          .setAuthor(client.user.tag, client.customAvatar, client.customAvatar)
+          .setThumbnail(customClientAvatar)
+          .setAuthor(message.client.user.tag, customClientAvatar, customClientAvatar)
           .setTitle(`Comando: ${command.name}`)
           .setDescription(command.help)
           .addField('Uso', prefix + command.name + command.usage)
@@ -51,7 +54,7 @@ var commandObject = {
         commands.set(cmd.name, { desc: cmd.description, name: prefix + cmd.name });
         if (commands.size == 10 || i + 1 == validCommands.size) {
           let n = i + 1 == validCommands.size ? void 0 : Math.round(i / 10);
-          let embed = helpEmbed(n, client);
+          let embed = helpEmbed(n, message.client);
           for (let comm of commands.array())
             embed.addField(comm.name, comm.desc);
           embeds.push(embed);
@@ -59,14 +62,14 @@ var commandObject = {
         }
       }
       if (!embeds[0])
-        return client.error('Help embed unavailable.') && message.channel.send('Si è verificato un errore!')
+        return error('Help embed unavailable.') && message.channel.send('Si è verificato un errore!')
           .catch(console.error);
       var sent = await message.channel.send(embeds[0])
         .catch(err => {
-          return client.error(err, message);
+          return error(err, message);
         });
       if (embeds.length == 1 || !sent)
-        return;
+        return null;
       let reaction = await sent.react('◀️')
         .then(() => {
           return sent.react('▶️');
@@ -76,7 +79,7 @@ var commandObject = {
         })
         .catch(console.error);
       if (!reaction)
-        return;
+        return null;
       var i = 0;
       function filter(reaction, user) {
         return ['❌', '▶️', '◀️'].includes(reaction.emoji.name) && user.id === message.author.id;
@@ -87,7 +90,7 @@ var commandObject = {
         switch (reaction.emoji.name) {
           case '◀️':
             if (i - 1 < 0)
-              return;
+              return null;
             i -= 1;
             embed = embeds[i];
             sent.edit(embed)
@@ -95,7 +98,7 @@ var commandObject = {
             break;
           case '▶️':
             if (i + 1 >= embeds.length)
-              return;
+              return null;
             i += 1;
             embed = embeds[i];
             sent.edit(embed)
@@ -105,14 +108,14 @@ var commandObject = {
             collector.stop('1000');
             break;
           default:
-            return;
+            return null;
         }
         return reaction.users.remove(user.id)
           .catch(console.error);
       });
       collector.on('end', (collected, reason) => {
         if (reason === '1000') {
-          const stopped = helpEmbed('', client)
+          const stopped = helpEmbed('', message.client)
             .setFooter('Made by DTrombett')
             .setDescription('Hai chiuso la pagina di aiuto!');
           sent.edit(stopped)
@@ -122,9 +125,14 @@ var commandObject = {
           .catch(console.error);
       });
     } catch (err) {
-      client.error(err, message);
+      error(err, message);
     }
-  }
-};
+  })
+  .setDescription("Mostra questo messaggio con tutti i miei comandi!")
+  .setHelp('Mostra tutti i comandi del bot o delle informazioni riguardo un comando in particolare!')
+  .setUsage('(comando)')
+  .addExample('', ' avatar')
+  .addAlias('h', 'aiuto', 'comandi', 'commands')
+  .setCooldown(5000);
 
-module.exports = commandObject;
+module.exports = command;

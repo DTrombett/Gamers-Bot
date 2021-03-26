@@ -1,16 +1,14 @@
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed, Message } = require('discord.js');
+const Command = require('../config/Command');
+const command = new Command('bug',
 
-var commandObject = {
-  name: 'bug',
-  description: 'Segnala un bug!',
-  help: 'Usa questo comando per segnalare un bug che hai scovato. Se possibile allega un\'immagine in modo da rendere più facile la risoluzione. Cerca di essere il più specifico possibile!',
-  usage: ' {descrizione} (allegato)',
-  examples: [' Il comando help mostra un prefisso sbagliato! `Allegati: screenshot`'],
-  time: 10000,
-  execute: async (message, args, client, prefix) => {
+  /**
+   * Segnala un bug!
+   * @param {Message} message - The message with the command
+   * @param {Array<String>} args - The args of this message
+   */
+  async function (message, args) {
     try {
-      if (!['711533701963448321', '767102981329911830'].includes(message.channel.id))
-        return;
       if (!args[0])
         return message.channel.send('Devi scrivere il bug da segnalare!')
           .catch(console.error);
@@ -22,12 +20,12 @@ var commandObject = {
         .setAuthor(message.author.tag, avatar, avatar)
         .setColor('RED')
         .setTitle('Nuovo bug!')
-        .setThumbnail(client.customAvatar)
+        .setThumbnail(message.client.user.buildAvatar)
         .setURL(attachment)
         .setDescription(args.join(' '))
         .setImage(attachment)
         .setFooter('Made by DTrombett');
-      var channel = client.channels.cache.get('786270849006567454');
+      var channel = message.client.channels.cache.get('786270849006567454');
       let msg = await channel.send(embed)
         .catch(console.error);
       if (!msg)
@@ -36,9 +34,13 @@ var commandObject = {
       return message.channel.send('Fatto! Bug inviato con successo.')
         .catch(console.error);
     } catch (err) {
-      client.error(err, message);
+      error(err, message);
     }
-  }
-};
+  })
+  .setDescription('Segnala un bug!')
+  .setHelp('Usa questo comando per segnalare un bug che hai scovato. Se possibile allega un\'immagine in modo da rendere più facile la risoluzione. Cerca di essere il più specifico possibile!')
+  .setUsage('{descrizione} (allegato)')
+  .addExample('Il comando help mostra un prefisso sbagliato! `Allegati: screenshot`')
+  .setCooldown(10000);
 
-module.exports = commandObject;
+module.exports = command;

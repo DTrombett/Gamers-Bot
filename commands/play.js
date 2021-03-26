@@ -1,22 +1,22 @@
 const ytsearch = require('yt-search');
 const ytdl = require('ytdl-core');
-const Video = require('../config/Video.js');
-const { Util } = require('discord.js');
+const Video = require('../config/Video');
+const { Util, Message } = require('discord.js');
+const Command = require('../config/Command');
+const error = require('../config/error');
 const { escapeMarkdown, removeMentions } = Util;
 
-var commandObject = {
-  name: 'play',
-  description: '',
-  help: '',
-  usage: ' ',
-  aliases: ['p', 'start'],
-  examples: [],
-  time: 10000,
-  execute: async (message, args, client, prefix) => {
+const command = new Command('play',
+
+  /**
+   * @param {Message} message - The message with the command
+   * @param {Array<String>} args - The args of this message
+   */
+  async function (message, args) {
     try {
       var voice = message.member.voice.channel;
       if (!voice)
-        return message.channel.send('Devi prina entrare in un canale vocale!')
+        return message.channel.send('Devi prima entrare in un canale vocale!')
           .catch(console.error);
       if (!args[0])
         return message.reply('Devi scrivere cosa vuoi ascoltare!')
@@ -31,7 +31,7 @@ var commandObject = {
       var msg = await message.channel.send('Sto cercando la tua canzone...')
         .catch(console.error);
       if (!msg)
-        return;
+        return null;
       var video = await ytsearch(args.join(' '))
         .then(vs => {
           return vs.videos[0];
@@ -68,9 +68,10 @@ var commandObject = {
       });
       message.guild.me.voice.setSelfDeaf(true);
     } catch (err) {
-      client.error(err, message);
+      error(err, message);
     }
-  }
-};
+  })
+  .addAlias('p', 'start')
+  .setCooldown(10000);
 
-module.exports = commandObject;
+module.exports = command;

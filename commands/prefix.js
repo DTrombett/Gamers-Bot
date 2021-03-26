@@ -1,31 +1,39 @@
-const { MessageEmbed, escapeMarkdown } = require('discord.js');
+const { MessageEmbed, escapeMarkdown, Message } = require('discord.js');
+const Command = require('../config/Command');
+const error = require('../config/error');
+const { getIDVar } = require('../config/variables');
 
-var commandObject = {
-  name: 'prefix',
-  description: 'Mostra i prefissi impostati nel server!',
-  help: 'Se hai dimenticato quali sono i prefissi da poter utilizzare con il bot usa questo comando per schiarirti le idee!',
-  aliases: ['prefixes'],
-  execute: (message, args, client, prefix) => {
+const command = new Command('prefix',
+
+  /**
+   * Mostra i prefissi impostati nel server
+   * @param {Message} message - The message with the command
+   */
+  function (message) {
     try {
-      var i = 0;
+      var i = 0, customClientAvatar = message.client.user.buildAvatar();
+      var prefix = getIDVar('prefix', message.guild.id);
+      prefix.forEach(p => {
+        if (p.includes(message.client.user.id)) prefix.remove(p);
+      });
       const embed = new MessageEmbed()
-        .setAuthor(client.user.tag, client.customAvatar, client.customAvatar)
+        .setAuthor(message.client.user.tag, customClientAvatar, customClientAvatar)
         .setTitle('Prefix')
         .setColor('RED')
-        .setThumbnail(client.customAvatar)
+        .setThumbnail(customClientAvatar)
         .setFooter('Made by DTrombett')
         .setTimestamp()
-        .setDescription(client.getIDVar('prefix', message.guild.id).map(p => {
-          if (p.includes(client.user.id))
-            return;
+        .setDescription(prefix.map(p => {
           i++;
-          return `${i}. ${escapeMarkdown(p)}`;
-        }).join(`\n`));
+          return `${i}. ${escapeMarkdown(p)}`
+        }).join('\n'));
       message.channel.send(embed);
     } catch (err) {
-      client.error(err, message);
+      error(err, message);
     }
-  }
-};
+  })
+  .setDescription('Mostra i prefissi impostati nel server!')
+  .setHelp('Se hai dimenticato quali sono i prefissi da poter utilizzare con il bot usa questo comando per schiarirti le idee!')
+  .addAlias('prefixes');
 
-module.exports = commandObject;
+module.exports = command;
