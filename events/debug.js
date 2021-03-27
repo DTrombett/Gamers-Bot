@@ -1,5 +1,3 @@
-const { Client } = require("discord.js");
-
 /**
  * Emitted for general debugging information.
  * @param {String} info - The debug information
@@ -10,7 +8,7 @@ module.exports = (info) => {
     if (info.includes('Heartbeat acknowledged')) {
       let splitted = info.split(' ');
       var ping = splitted[splitted.length - 1];
-      if (ping < 200) return;
+      if (ping.slice(0, -3) < 200) return;
       return console.info(`Latency -> ${ping} [${new Date().toLocaleString('it-IT', { timeZone: 'Europe/Rome' })}]`);
     }
     console.info(`info -> ${info} [${new Date().toLocaleString('it-IT', { timeZone: 'Europe/Rome' })}]`);
