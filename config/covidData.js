@@ -190,6 +190,14 @@ class Tamponi {
 }
 
 /**
+ * Object con le regioni in zona rossa, arancione e gialla.
+ * @typedef {Object} Zone
+ * @property {Collection<String, Regione} rosse - Regioni in zona rossa
+ * @property {Collection<String, Regione} arancioni - Regioni in zona arancione
+ * @property {Collection<String, Regione} gialle - Regioni in zona gialla
+ */
+
+/**
  * Dati Covid per uno stato
  */
 class Stato extends CovidData {
@@ -226,6 +234,28 @@ class Stato extends CovidData {
         }
     }
 
+    /**
+     * Regioni in zona rossa
+     * @returns {Zone}
+     */
+    get zone() {
+        const zone = {
+            rossa: new Collection(),
+            arancione: new Collection(),
+            gialla: new Collection()
+        }
+        const array = this.regioni.array();
+        for (let i = 0; i < array.length; i++) {
+            const el = array[i];
+            zone[el.color === 'RED' ? 'rossa' : el.color === 'ORANGE' ? 'arancione' : 'gialla'].set(el.nome, el);
+        }
+        return zone;
+    }
+
+    /**
+     * JSON stringify this state
+     * @returns {String} The stringified object
+     */
     toJSON() {
         return JSON.stringify({
             stato: this.raw,
@@ -325,8 +355,16 @@ class Regione extends CovidData {
         this.nome = regione.denominazione_regione;
 
         /**
-         * Il colore della regione che indica il rischio
-         * @type {String}
+         * Colore di una regione
+         * @typedef {'RED'|'ORANGE'|'YELLOW'} ColoreRegione
+         */
+
+        /**
+         * Il colore della regione che indica il rischio di contagiosità; Può essere uno dei seguenti:
+         * * `RED` - Alto rischio
+         * * `ORANGE` - Medio rischio
+         * * `YELLOW` - Basso rischio
+         * @type {ColoreRegione}
          */
         this.color = require("./covid").regions[this.nome];
 
