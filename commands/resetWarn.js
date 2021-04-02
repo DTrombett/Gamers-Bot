@@ -66,7 +66,7 @@ const command = new Command('resetwarn',
           });
         return null;
       }
-      var target = await findMember(message, args.join(' '), true);
+      var target = await findMember(message, args.join(' '), true, true);
       if (target === null)
         return null;
       if (!target)

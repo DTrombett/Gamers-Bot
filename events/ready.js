@@ -2,7 +2,7 @@ const { scheduleJob } = require("node-schedule");
 const { client } = require("..");
 const { setCursedWords } = require("../config/cursedWords");
 const gitHubApi = require("../config/gitHubApi");
-const fetchCovidData = require("./fetchCovidData");
+const fetchCovidData = require("../config/fetchCovidData");
 
 module.exports = async () => {
     try {

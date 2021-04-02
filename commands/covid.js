@@ -1,7 +1,8 @@
 const error = require('../config/error');
 var Command = require('../config/Command');
 const { MessageEmbed, Message } = require('discord.js');
-const normalize = require('../config/normalize');
+const normalizeStrings = require('normalize-strings');
+const normalize = (text) => normalizeStrings(text.normalize()).toLowerCase().replace(/ *(_|-|\n) */g, ' ');
 
 var command = new Command('covid',
 

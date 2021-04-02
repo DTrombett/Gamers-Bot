@@ -3,7 +3,7 @@ const format = require('dateformat');
 const time = require('pretty-ms');
 const getEmoji = require('../config/getEmoji');
 const Command = require('../config/Command');
-const findMember = require('../config/findMember');
+const { findMember } = require('../config/findMember');
 const error = require('../config/error');
 
 const command = new Command('info',
@@ -15,12 +15,8 @@ const command = new Command('info',
    */
   async function (message, args) {
     try {
-      var member = await findMember(message, args.join(' '), true, message.client);
-      if (member === null)
-        return null;
-      if (!member)
-        return message.channel.send('Non ho trovato questo utente!')
-          .catch(console.error);
+      var member = await findMember(message, args.join(' '));
+      if (!member) null;
       var user = member.user || member;
       var bot = !!user.bot ? 'Sì' : 'No';
       var createdAt = format(user.createdAt, 'dddd dd mmmm yyyy HH:MM:ss');
@@ -36,7 +32,6 @@ const command = new Command('info',
           emojiFlags.push(getEmoji(flag, message.client));
       emojiFlags = !emojiFlags[0] ? 'None' : emojiFlags.join(' ');
       var id = user.id;
-      var status = user.presence.status;
       var tag = user.tag;
       var avatar = user.displayAvatarURL({
         format: 'png',
@@ -44,7 +39,7 @@ const command = new Command('info',
         size: 4096
       });
       let color = member.displayHexColor || message.guild.roles.highest.color;
-      if (!color || !tag || !avatar || !id || !emojiFlags || !createdAt || !passed || !status || !bot)
+      if (!color || !tag || !avatar || !id || !emojiFlags || !createdAt || !passed || !bot)
         return error('Failed to fetch user info.', message) && message.channel.send('Si è verificato un errore!')
           .catch(console.error);
       const embedInfo = new MessageEmbed()
@@ -58,7 +53,7 @@ const command = new Command('info',
           dynamic: true,
           size: 4096
         }))
-        .addFields({ name: 'Badges', value: emojiFlags }, { name: 'Data creazione', value: createdAt + ` (\`${passed} fa\`)` }, { name: 'Stato', value: status }, { name: 'Bot', value: bot })
+        .addFields({ name: 'Badges', value: emojiFlags }, { name: 'Data creazione', value: createdAt + ` (\`${passed} fa\`)` }, { name: 'Bot', value: bot })
         .setTimestamp()
         .setFooter(`Requested by ${message.author.tag}`, message.author.displayAvatarURL({
           format: 'png',

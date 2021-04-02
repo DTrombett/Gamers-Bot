@@ -19,7 +19,7 @@ const command = new Command('warn',
       if (!args[0])
         return message.channel.send('Devi specificare il membro da avvertire!')
           .catch(console.error);
-      var target = await findMember(message, args.join(' '));
+      var target = await findMember(message, args.join(' '), false, true);
       if (target === null)
         return null;
       if (!target)

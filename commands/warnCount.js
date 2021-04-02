@@ -13,7 +13,7 @@ const command = new Command('warncount',
    */
   async function (message, args) {
     try {
-      var member = await findMember(message, args.join(' '), true);
+      var member = await findMember(message, args.join(' '), true, true);
       if (member === null)
         return null;
       if (!member)

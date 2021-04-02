@@ -25,7 +25,7 @@ const command = new Command('tempmute',
           .catch(console.error);
       if (!ms(time))
         return message.channel.send("Devi scrivere la durata del mute!");
-      var target = await findMember(message, args.join(' '));
+      var target = await findMember(message, args.join(' '), false, true);
       if (target === null)
         return null;
       if (!target)

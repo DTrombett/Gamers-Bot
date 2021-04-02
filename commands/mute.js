@@ -16,7 +16,7 @@ const command = new Command('mute',
       if (!message.member.permissions.has("MANAGE_ROLES"))
         return message.channel.send("Non hai abbastanza permessi per eseguire questa azione!")
           .catch(console.error);
-      var target = await findMember(message, args.join(' '));
+      var target = await findMember(message, args.join(' '), false, true);
       if (target === null)
         return null;
       if (!target)

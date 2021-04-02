@@ -1,7 +1,7 @@
 const { MessageEmbed, Message } = require('discord.js');
 const Command = require('../config/Command');
 const error = require('../config/error');
-const findMember = require('../config/findMember');
+const { findMember } = require('../config/findMember');
 
 const command = new Command('avatar',
 
@@ -12,7 +12,7 @@ const command = new Command('avatar',
    */
   async function (message, args) {
     try {
-      var member = await findMember(message, args.join(' '), true, message.client);
+      var member = await findMember(message, args.join(' '));
       if (member === null)
         return null;
       if (!member)

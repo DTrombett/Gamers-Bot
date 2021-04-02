@@ -2,7 +2,7 @@ const { Canvas } = require('canvacord');
 const { MessageAttachment, Message } = require('discord.js');
 const Command = require('../config/Command');
 const error = require('../config/error');
-const findMember = require('../config/findMember');
+const { findMember } = require('../config/findMember');
 
 const command = new Command('beautiful',
 
@@ -13,7 +13,7 @@ const command = new Command('beautiful',
    */
   async function (message, args) {
     try {
-      let member = await findMember(message, args.join(' '), true, message.client);
+      let member = await findMember(message, args.join(' '));
       if (member === null)
         return null;
       if (!member)

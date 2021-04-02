@@ -1,5 +1,6 @@
 .env
 Appunti.js
+index.ts
 node_modules/
 dashboard/
 *.log
