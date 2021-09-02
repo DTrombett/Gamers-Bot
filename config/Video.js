@@ -17,7 +17,7 @@
 /**
  * Represents a Youtube video.
  */
-module.exports = class Video {
+class Video {
 
   /**
    * @param {rawVideo} video - The raw data for this video
@@ -35,3 +35,5 @@ module.exports = class Video {
     this.author = (video.author ? video.author.name : 'unknown') || 'unknown';
   }
 };
+
+module.exports = Video

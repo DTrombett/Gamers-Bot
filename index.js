@@ -1,16 +1,16 @@
-'use strict';
-
-const { Client, Collection, WebhookClient } = require('discord.js');
-const express = require('express');
+const { Client, WebhookClient, Intents } = require('discord.js'), express = require('express');
 const { inspect } = require('util');
 const { config } = require('dotenv');
 const { readdirSync } = require('fs');
+const dashboard = require('./config/dashboard');
 const app = express();
 const port = 3000;
 
 console.log('Starting');
+require('./config/Util');
 config();
 
+const intents = new Intents(["GUILDS", "GUILD_MEMBERS", "GUILD_BANS", "GUILD_EMOJIS", "GUILD_VOICE_STATES", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS"]);
 const partials = ['MESSAGE', 'REACTION', 'USER', 'GUILD_MEMBER'];
 const activity = {
     name: '+help',
@@ -21,10 +21,11 @@ const presence = {
     activity: activity
 };
 const ws = {
+    intents: intents,
     large_threshold: 100
 };
 const clientOptions = {
-    shards: 'auto',
+    shards: "auto",
     partials: partials,
     messageCacheMaxSize: 500,
     messageCacheLifetime: 86400,
@@ -38,20 +39,18 @@ const clientOptions = {
     presence: presence,
     ws: ws
 };
+// @ts-ignore
 const client = new Client(clientOptions);
-client.webhook = new WebhookClient('820940087797088266', process.env.WEBHOOK_TOKEN)
-exports.client = client;
-exports.app = app;
+// @ts-ignore
+client.loadCommands();
+// @ts-ignore
+global._client = client;
+// @ts-ignore
+global._app = app;
+// @ts-ignore
+client.webhook = new WebhookClient('820940087797088266', process.env.WEBHOOK_TOKEN);
 
-const commandFiles = readdirSync('./commands/').filter(file => file.endsWith('.js'));
 const eventFiles = readdirSync('./events/').filter(event => event.endsWith('.js'));
-
-client.commands = new Collection();
-
-for (let file of commandFiles) {
-    const command = require(`./commands/${file}`);
-    client.commands.set(command.name, command);
-}
 for (let file of eventFiles) {
     const event = require(`./events/${file}`);
     const eventName = file.split('.')[0];
@@ -59,35 +58,28 @@ for (let file of eventFiles) {
 }
 
 // Process events
-process.on('unhandledRejection', console.log);
-process.on('exit', code => console.log('Process exits with code: ', code));
-process.on('disconnect', code => console.log('Process disconnected with code: ', code));
-process.on('multipleResolves', (type, _promise, reason) => console.error('A promise was resolved more than once! Type: ', type, ' Reason: ', reason));
-process.on('uncaughtException', console.error);
-process.on('warning', console.warn);
+process
+    .on('unhandledRejection', console.log)
+    .on('exit', code => console.log('Process exits with code: ', code))
+    // @ts-ignore
+    .on('disconnect', code => console.log('Process disconnected with code: ', code))
+    .on('multipleResolves', (type, _promise, reason) => console.error('A promise was resolved more than once! Type: ', type, ' Reason: ', reason))
+    .on('uncaughtException', console.error);
 
 // Client events
-client.once('error', error => console.error('Discord error occurred! Error: ', error));
-client.on('shardError', (error, shardID) => console.error(`Received an error on shard ${shardID}\n`, `Message: `, error));
-client.once('invalidated', () => process.exit('Bot session invalidated!'));
-client.on('warn', console.warn);
-client.on('guildCreate', guild => {
-    console.log(`Bot joined a new guild! Guild:`);
-    console.log(guild);
-});
-client.on('guildDelete', guild => {
-    console.log(`${guild.deleted ? 'A guild was deleted' : 'The bot left a guild'}! Guild:`);
-    console.log(guild);
-});
-client.on('guildUnavailable', guild => {
-    console.log(`A guild is unavailable! Guild:`);
-    console.log(guild);
-});
-client.on('rateLimit', rateLimitInfo => console.log(inspect(rateLimitInfo)));
+client
+    .once('error', error => console.error('Discord error occurred! Error: ', error))
+    .once('invalidated', () => process.exit(400))
+    .on('shardError', (error, shardID) => console.error(`Received an error on shard ${shardID}\n`, `Message: `, error))
+    .on('warn', console.warn)
+    .on('guildCreate', guild => console.log(`Bot joined a new guild! Guild:\n`, guild))
+    .on('guildDelete', guild => console.log(`${guild.deleted ? 'A guild was deleted' : 'The bot left a guild'}! Guild:\n`, guild))
+    .on('guildUnavailable', guild => console.log(`A guild is unavailable! Guild:\n`, guild))
+    .on('rateLimit', rateLimitInfo => console.log(inspect(rateLimitInfo)));
 
-app.use((_req, res) => res.redirect('https://discord.gg/uuHajVFAh5'));
-app.listen(port, () => console.log(`Online at http://localhost:${port}`));
+app
+    .use(dashboard)
+    .listen(port, () => console.log(`Online at http://localhost:${port}`));
 
 client.login();
-
 console.log('Connecting...');

@@ -1,17 +1,13 @@
 const ytsearch = require('yt-search');
 const ytdl = require('ytdl-core');
 const Video = require('../config/Video');
-const { Util, Message } = require('discord.js');
-const Command = require('../config/Command');
+const { Util } = require('discord.js');
+const { Command } = require('../config');
 const error = require('../config/error');
 const { escapeMarkdown, removeMentions } = Util;
 
 const command = new Command('play',
 
-  /**
-   * @param {Message} message - The message with the command
-   * @param {Array<String>} args - The args of this message
-   */
   async function (message, args) {
     try {
       var voice = message.member.voice.channel;

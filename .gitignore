@@ -1,10 +1,12 @@
 .env
 Appunti.js
-index.ts
+tsconfig.json
+typescript
 node_modules/
 dashboard/
 *.log
 /dist
+/api
 .vscode/
 variables/
 package-lock.json

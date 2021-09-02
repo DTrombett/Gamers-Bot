@@ -1,14 +1,9 @@
-const { Message } = require("discord.js");
-const Command = require("../config/Command");
+const { Command } = require('../config');
 const error = require("../config/error");
 const { resetVar } = require("../config/variables");
 
 const command = new Command('resetprefix',
 
-  /**
-   * Reimposta il prefisso nel server!
-   * @param {Message} message - The message with the command
-   */
   async function (message) {
     try {
       if (!message.member.permissions.has('MANAGE_SERVER'))

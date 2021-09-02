@@ -1,15 +1,10 @@
 const { MessageAttachment, MessageEmbed, Util, Message } = require('discord.js');
 const { inspect } = require('util');
 const format = require('dateformat');
-const Command = require('../config/Command');
+const { Command } = require('../config');
 
 module.exports = new Command('eval',
 
-  /**
-   * @param {Message} message - The message with the command
-   * @param {Array<String>} args - The args of this message
-   * @param {String} _prefix - The prefix used in the message
-   */
   async function (message, args, _prefix) {
     if (message.author.id != '597505862449496065')
       return null;

@@ -1,18 +1,13 @@
-const { MessageEmbed, Message } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const format = require('dateformat');
 const time = require('pretty-ms');
 const getEmoji = require('../config/getEmoji');
-const Command = require('../config/Command');
+const { Command } = require('../config');
 const { findMember } = require('../config/findMember');
 const error = require('../config/error');
 
 const command = new Command('info',
 
-  /**
-   * Scopri le informazioni di un utente!
-   * @param {Message} message - The message with the command
-   * @param {Array<String>} args - The args of this message
-   */
   async function (message, args) {
     try {
       var member = await findMember(message, args.join(' '));

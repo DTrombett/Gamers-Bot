@@ -1,4 +1,4 @@
-const { Stato } = require("./CovidData");
+const Covid = require("./CovidData");
 
 /**
  * Object with infos about color of regions
@@ -14,7 +14,7 @@ const { Stato } = require("./CovidData");
 exports.regions = {};
 /**
  * Covid data for Italy
- * @type {Stato}
+ * @type {Covid}
  */
 exports.covidData = {};
 /**
@@ -36,9 +36,9 @@ exports.addColors = (object) => {
  * @param {Array<Object>} stato - Raw data for a state
  * @param {Array<Object>} regioni - Array of raw data for regions
  * @param {Array<Object>} province - Array of raw data for cities
- * @returns {Stato} Covid data for Italy
+ * @returns {Covid} Covid data for Italy
  */
 exports.setCovidData = (stato, regioni, province) => {
-  exports.covidData = new Stato(stato[0], regioni, province);
+  exports.covidData = new Covid(stato[0], regioni, province);
   return exports.covidData;
 };

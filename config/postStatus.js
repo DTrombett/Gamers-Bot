@@ -1,5 +1,3 @@
-const error = require("./error");
-const { client } = require('../index');
 const { MessageEmbed, Message } = require("discord.js");
 
 /**
@@ -7,17 +5,15 @@ const { MessageEmbed, Message } = require("discord.js");
  * @param {Array<MessageEmbed>} embeds - An array of embeds for the message
  * @returns {Promise<Message>} The message sent
  */
-module.exports = (embeds) => {
-    var customClientAvatar = client.user.buildAvatar();
+module.exports = async (embeds) => {
+    var customClientAvatar = _client.user.buildAvatar();
     embeds.forEach(e => e
         .setAuthor(e.author.name, customClientAvatar, customClientAvatar)
         .setThumbnail(customClientAvatar)
         .setTitle('STATUS')
         .setFooter('Made by DTrombett')
         .setTimestamp());
-    var options = { 'username': client.user.username, 'avatarURL': client.user.buildAvatar(), 'embeds': embeds };
-    return client.webhook.send(options)
-        .catch(err => {
-            return error(err, embeds);
-        });
+    var options = { 'username': _client.user.username, 'avatarURL': _client.user.buildAvatar(), 'embeds': embeds };
+    return _client.webhook.send(options)
+        .catch(err => console.error(err));
 }

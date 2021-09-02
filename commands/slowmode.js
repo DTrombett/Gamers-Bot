@@ -1,15 +1,9 @@
-const { Message } = require('discord.js');
 const ms = require('ms');
-const Command = require('../config/Command');
+const { Command } = require('../config');
 const error = require('../config/error');
 
 const command = new Command('slowmode',
 
-  /**
-   * Modifica la slowmode del canale!
-   * @param {Message} message - The message with the command
-   * @param {Array<String>} args - The args of this message
-   */
   async function (message, args) {
     try {
       let perms = message.channel.permissionsFor(message.member);

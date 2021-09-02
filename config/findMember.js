@@ -117,7 +117,7 @@ async function findMember(message, text, options = {}) {
         return membersArray[0];
     if (size === 0)
         return send(message, filters.length === 1 ? filters[0].message || 'Non puoi scegliere questo utente!' : 'Non puoi scegliere questo utente!');
-    let sent = message.channel.send(`Ho trovato più utenti che corrispondono a questa ricerca! Scrivi il numero dell'utente corretto o 0 per cancellare:\n${members.map((m, i) => `${i + 1}. **${escapeMarkdown(m instanceof User ? m.tag : m.user.tag)}**`).join('\n')}`)
+    let sent = message.channel.send(`Ho trovato più utenti che corrispondono a questa ricerca! Scrivi il numero dell'utente corretto o 0 per cancellare:\n${membersArray.map((m, i) => `${i + 1}. **${escapeMarkdown(m instanceof User ? m.tag : m.user.tag)}**`).join('\n')}`)
         .catch(console.error);
     const msg = await message.channel.awaitMessages(m => m.author.id === authorID && m.content >= 0 && m.content <= size, {
         time: 60000,
@@ -134,4 +134,4 @@ async function findMember(message, text, options = {}) {
     return send(message, 'Nessuna risposta, comando cancellato.');
 }
 
-exports.findMember = findMember;
+module.exports = findMember;

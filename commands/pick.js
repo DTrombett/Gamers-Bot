@@ -1,14 +1,8 @@
-const { Message } = require("discord.js");
-const Command = require("../config/Command");
+const { Command } = require('../config');
 const error = require("../config/error");
 
 const command = new Command('pick',
 
-  /**
-   * Lancia il dado... e prendi un numero random!
-   * @param {Message} message - The message with the command
-   * @param {Array<String>} args - The args of this message
-   */
   async function (message, args) {
     try {
       if (!!args[0] && isNaN(args[0]) || !!args[1] && isNaN(args[1]))

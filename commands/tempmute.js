@@ -1,17 +1,12 @@
 const ms = require('ms');
-const { escapeMarkdown, Message } = require('discord.js');
-const Command = require('../config/Command');
+const { escapeMarkdown } = require('discord.js');
+const { Command } = require('../config');
 const { getMemberVar, setMemberVar, resetVar } = require('../config/variables');
 const findMember = require('../config/findMember');
 const error = require('../config/error');
 
 const command = new Command('tempmute',
 
-  /**
-   * Silenzia un membro nel server per un periodo di tempo!
-   * @param {Message} message - The message with the command
-   * @param {Array<String>} args - The args of this message
-   */
   async function (message, args) {
     try {
       if (!args[1])

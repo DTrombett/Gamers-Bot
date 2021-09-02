@@ -1,20 +1,14 @@
 const error = require('../config/error');
 var Command = require('../config/Command');
-const { MessageEmbed, Message } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const normalizeStrings = require('normalize-strings');
 const normalize = (text) => normalizeStrings(text.normalize()).toLowerCase().replace(/ *(_|-|\n) */g, ' ');
 
 var command = new Command('covid',
 
-    /**
-     * Scopri le informazioni riguardo la pandemia di Covid-19!
-     * @param {Message} message - The message with the command
-     * @param {Array<String>} args - The args of this message
-     * @param {String} prefix - The prefix used in the message
-     */
     async function (message, args) {
         try {
-            const { covidData } = require('../config/covid');
+            const { covidData } = require('../config/covidUtil');
             const covidEmbed = new MessageEmbed()
                 .setURL('https://github.com/pcm-dpc/COVID-19/raw/master/schede-riepilogative/regioni/dpc-covid19-ita-scheda-regioni-latest.pdf');
             var element;

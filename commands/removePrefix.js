@@ -1,15 +1,9 @@
-const { Message } = require("discord.js");
-const Command = require("../config/Command");
+const { Command } = require('../config');
 const error = require("../config/error");
 const { getIDVar, setIDVar } = require("../config/variables");
 
 const command = new Command('removeprefix',
 
-  /**
-   * Rimuovi un prefisso dal server!
-   * @param {Message} message - The message with the command
-   * @param {Array<String>} args - The args of this message
-   */
   async function (message, args) {
     try {
       if (!message.member.permissions.has('MANAGE_SERVER'))

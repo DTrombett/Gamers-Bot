@@ -200,7 +200,7 @@ class Tamponi {
 /**
  * Dati Covid per uno stato
  */
-class Stato extends CovidData {
+class Covid extends CovidData {
 
     /**
      * @param {Object} raw - Dati riguardo lo stato
@@ -272,7 +272,7 @@ class Provincia {
 
     /**
      * @param {Object} raw - Dati riguardo questa provincia
-     * @param {Stato} stato - Lo stato di questa provincia
+     * @param {Covid} stato - Lo stato di questa provincia
      * @param {Regione} regione - La regione di questa provincia
      */
     constructor(raw, stato, regione) {
@@ -291,7 +291,7 @@ class Provincia {
 
         /**
          * Lo stato
-         * @type {Stato}
+         * @type {Covid}
          */
         this.stato = stato;
 
@@ -337,14 +337,14 @@ class Regione extends CovidData {
     /**
      * @param {Object} regione - Dati riguardo una regione
      * @param {Array<Object>} province - Dati riguardo le province di questa regione
-     * @param {Stato} stato - Stato a cui si riferisce
+     * @param {Covid} stato - Stato a cui si riferisce
      */
     constructor(regione, province, stato) {
         super(regione);
 
         /**
          * Lo stato di questa regione
-         * @type {Stato}
+         * @type {Covid}
          */
         this.stato = stato;
 
@@ -366,7 +366,7 @@ class Regione extends CovidData {
          * * `YELLOW` - Basso rischio
          * @type {ColoreRegione}
          */
-        this.color = require("./covid").regions[this.nome];
+        this.color = require("./covidUtil").regions[this.nome];
 
         /**
          * Un'immagine di questa regione
@@ -416,9 +416,4 @@ class Regione extends CovidData {
     }
 }
 
-exports.CovidData = CovidData;
-exports.CovidCases = CovidCases;
-exports.Tamponi = Tamponi;
-exports.Stato = Stato;
-exports.Regione = Regione;
-exports.Provincia = Provincia;
+module.exports = Covid;

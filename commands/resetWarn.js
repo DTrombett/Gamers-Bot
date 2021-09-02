@@ -1,16 +1,11 @@
-const { escapeMarkdown, Message } = require('discord.js');
-const Command = require('../config/Command');
+const { escapeMarkdown } = require('discord.js');
+const { Command } = require('../config');
 const error = require('../config/error');
 const findMember = require('../config/findMember');
 const { resetVar } = require('../config/variables');
 
 const command = new Command('resetwarn',
 
-  /**
-   * Reimposta gli avvertimenti dei membri!
-   * @param {Message} message - The message with the command
-   * @param {Array<String>} args - The args of this message
-   */
   async function (message, args) {
     try {
       if (!message.member.hasPermission('ADMINISTRATOR'))

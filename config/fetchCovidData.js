@@ -1,11 +1,11 @@
 const { default: fetch } = require("node-fetch");
 const gitHubApi = require("../config/gitHubApi");
-const { addColors, setCovidData } = require("../config/covid");
-const { Stato } = require("../config/CovidData");
+const { addColors, setCovidData } = require("./covidUtil");
+const Covid = require("../config/CovidData");
 
 /**
  * Fetch and resolve data for covid in Italy
- * @returns {Stato} The fetched data
+ * @returns {Covid} The fetched data
  */
 async function fetchCovidData() {
     const colors = fetch('https://covid19.zappi.me/coloreRegioni.php')

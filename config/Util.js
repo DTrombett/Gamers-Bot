@@ -1,7 +1,28 @@
+// @ts-nocheck
 const { Guild, MessageAttachment, TextChannel, User, Message, Client, Collection } = require("discord.js");
+const { readdir } = require("fs");
 const normalizeStrings = require("normalize-strings");
-const Command = require("./Command");
+const { Command } = require('../config');
 const { getIDVar, getDefault } = require("./variables");
+
+global._requireUncachedAsync = async path => new Promise((resolve, reject) => {
+  try {
+    path = require.resolve(`.${path}`);
+  } catch (error) {
+    reject(error);
+    return;
+  }
+  delete require.cache[path];
+  resolve(require(path));
+});
+
+global._requireAsync = async path => new Promise((resolve, reject) => {
+  try {
+    resolve(require(path));
+  } catch (error) {
+    reject(error);
+  }
+});
 
 i18n = {
   dayNames: ["Dom", "Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"],
@@ -73,6 +94,32 @@ Array.prototype.remove = function () {
   }
   return this;
 };
+
+Client.prototype.manteinance = false;
+
+/**
+ * Asynchronously load bot commands
+ * @returns {Promise<Collection<string, Command>>}
+ */
+Client.prototype.loadCommands = async function loadCommands() {
+  const man = this.manteinance;
+  this.manteinance = true;
+  return new Promise((resolve, reject) => readdir('./commands/', async (err, files) => {
+    if (err) {
+      reject(err);
+      return;
+    }
+    files = files.filter(file => file.endsWith('.js'));
+    this.commands = new Collection();
+    const promises = [];
+    for (const file of files) promises.push(_requireUncachedAsync(`./commands/${file}`)
+      .then(command => this.commands.set(command.name, command))
+      .catch(console.error));
+    const collections = await Promise.all(promises);
+    resolve(collections[0]);
+    this.manteinance = man;
+  }));
+}
 
 /**
  * Get the log channel of a guild if any. Otherwise the default log channel will returned.
@@ -170,4 +217,17 @@ Object.defineProperty(Client.prototype, "messages", {
   * @returns {Collection<Snowflake, Message>}
   */
   get: messages
+});
+
+Object.defineProperty(Client.prototype, "commandUses", {
+
+  /**
+  * A collection of all command uses.
+  * @returns {Collection<Snowflake, CommandUse>}
+  */
+  get: function commandUses() {
+    const collection = new Collection(), commands = this.commands.array();
+    for (let i = 0; i < commands.length; i++) collection.concat(commands[i].uses);
+    return collection;
+  }
 });

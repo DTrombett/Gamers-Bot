@@ -1,14 +1,10 @@
-const { MessageEmbed, escapeMarkdown, Message } = require('discord.js');
-const Command = require('../config/Command');
+const { MessageEmbed, escapeMarkdown } = require('discord.js');
+const { Command } = require('../config');
 const error = require('../config/error');
 const { getIDVar } = require('../config/variables');
 
 const command = new Command('prefix',
 
-  /**
-   * Mostra i prefissi impostati nel server
-   * @param {Message} message - The message with the command
-   */
   function (message) {
     try {
       var i = 0, customClientAvatar = message.client.user.buildAvatar();

@@ -1,13 +1,9 @@
 const { Permissions } = require('discord.js');
-const Command = require('../config/Command');
+const { Command } = require('../config');
 const error = require('../config/error');
 
 const command = new Command('invite',
 
-  /**
-   * @param {Message} message - The message with the command
-   * @param {Array<String>} args - The args of this message
-   */
   async function (message, args) {
     try {
       if (message.author.id != '597505862449496065')

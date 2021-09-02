@@ -7,10 +7,10 @@ const { inspect } = require('util');
  * @param {Message|*} element - The message or any other value wich caused the error
  * @returns {?Promise<Message>} The message sent in error logs
  */
-module.exports = (err, element) => {
+module.exports = async (err, element) => {
   console.error(err);
   try {
-    if (!element) return null;
+    if (!element || !element.client) return null;
     var channel = element.client.channels.cache.get('802929224935407686');
     var embed = new MessageEmbed()
       .setTitle('Error occured!')

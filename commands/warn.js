@@ -1,16 +1,11 @@
 const { escapeMarkdown } = require('discord.js');
-const Command = require('../config/Command');
+const { Command } = require('../config');
 const error = require('../config/error');
 const findMember = require('../config/findMember');
 const { getMemberVar, setMemberVar } = require('../config/variables');
 
 const command = new Command('warn',
 
-  /**
-   * Avverti un utente!
-   * @param {Message} message - The message with the command
-   * @param {Array<String>} args - The args of this message
-   */
   async function (message, args) {
     try {
       if (!message.member.hasPermission('MANAGE_MESSAGES'))

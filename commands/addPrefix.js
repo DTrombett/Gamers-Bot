@@ -1,20 +1,14 @@
-const { Message } = require("discord.js");
-const Command = require("../config/Command");
+const { Command } = require('../config');
 const error = require("../config/error");
 const { getIDVar, setIDVar } = require("../config/variables");
 
 const command = new Command('addprefix',
 
-  /**
-   * Imposta il prefisso del bot nel tuo server!
-   * @param {Message} message - The message with the command
-   * @param {Array<String>} args - The args of this message
-   */
   async function (message, args) {
     try {
       if (!message.member.permissions.has('MANAGE_SERVER'))
         try {
-          return message.channel.send('Mi displiace ma non hai abbastanza permessi per utilizzare questo comando!');
+          return message.channel.send('Mi dispiace ma non hai abbastanza permessi per utilizzare questo comando!');
         } catch (message_1) {
           return console.error(message_1);
         }
@@ -55,7 +49,7 @@ const command = new Command('addprefix',
         return (error('Failed to add prefix', message), message.channel.send('Si è verificato un errore!')
           .catch(console.error));
       try {
-        return message.channel.send(`Fatto! Ho aggiunto il prefisso \`${args[0]}\``);
+        return message.channel.send(`Fatto! Ho aggiunto il prefisso \`${args[0]}\` xD`);
       } catch (message_1) {
         return console.error(message_1);
       }

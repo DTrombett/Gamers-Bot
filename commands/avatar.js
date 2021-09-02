@@ -1,15 +1,10 @@
-const { MessageEmbed, Message } = require('discord.js');
-const Command = require('../config/Command');
+const { MessageEmbed } = require('discord.js');
+const { Command } = require('../config');
 const error = require('../config/error');
-const { findMember } = require('../config/findMember');
+const findMember = require('../config/findMember');
 
 const command = new Command('avatar',
 
-  /**
-   * Guarda l'avatar di un utente!
-   * @param {Message} message - The message with the command
-   * @param {Array<String>} args - The args of this message
-   */
   async function (message, args) {
     try {
       var member = await findMember(message, args.join(' '));

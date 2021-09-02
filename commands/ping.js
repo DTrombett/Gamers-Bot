@@ -1,13 +1,8 @@
-const { Message } = require("discord.js");
-const Command = require("../config/Command");
+const { Command } = require('../config');
 const error = require("../config/error");
 
 const command = new Command('ping',
 
-  /**
-   * Pong!
-   * @param {Message} message - The message with the command
-   */
   async function (message) {
     try {
       var sent = await message.channel.send(`🏓 Pong!`)

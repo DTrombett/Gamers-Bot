@@ -1,12 +1,7 @@
-const { MessageEmbed, Message } = require('discord.js');
-const Command = require('../config/Command');
+const { MessageEmbed } = require('discord.js');
+const { Command } = require('../config');
 const command = new Command('bug',
 
-  /**
-   * Segnala un bug!
-   * @param {Message} message - The message with the command
-   * @param {Array<String>} args - The args of this message
-   */
   async function (message, args) {
     try {
       if (!args[0])

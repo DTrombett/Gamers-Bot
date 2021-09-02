@@ -1,20 +1,24 @@
-const { MessageAttachment, MessageEmbed, Message } = require('discord.js');
+const { MessageAttachment, MessageEmbed, Collection } = require('discord.js');
 const { readdirSync, readFile } = require('fs');
 const Zip = require('adm-zip');
 const ms = require('ms');
 const rimraf = require('rimraf');
 const fetch = require('node-fetch');
-const Command = require('../config/Command');
+const { Command } = require('../config');
 const { getVar, setVar } = require('../config/variables');
 const error = require('../config/error');
+const { createWriteStream } = require('fs');
+const { getHeapSnapshot } = require('v8');
+
+const createHeapSnapshot = () => {
+  const snapshotStream = getHeapSnapshot();
+  const fileStream = createWriteStream(`./${Date.now()}.heapsnapshot`);
+  snapshotStream.pipe(fileStream);
+  return new Promise(resolve => snapshotStream.on('end', resolve));
+}
 
 const command = new Command('debug',
 
-  /**
-   * @param {Message} message - The message with the command
-   * @param {Array<String>} args - The args of this message
-   * @param {String} prefix - The prefix used in the message
-   */
   async function (message, args, prefix) {
     try {
       if (message.author.id != '597505862449496065')
@@ -55,6 +59,7 @@ const command = new Command('debug',
           message.delete();
           var text;
           var json;
+          /** @type {string[]} */
           var errors = [];
           var attachment;
           await fetch(args[2]).then(async (res) => {
@@ -130,8 +135,8 @@ const command = new Command('debug',
           message.channel.send(used);
           break;
         case 'man':
-          var man = !getVar('man');
-          setVar('man', man);
+          let man = !message.client.manteinance;
+          message.client.manteinance = man;
           if (man)
             await message.client.user.setPresence({
               status: 'idle',
@@ -140,7 +145,6 @@ const command = new Command('debug',
                 type: 'WATCHING',
               }
             });
-
           else
             await message.client.user.setPresence({
               status: 'online',
@@ -150,6 +154,17 @@ const command = new Command('debug',
               }
             });
           message.channel.send('Fatto!');
+          break;
+        case 'heapdump':
+          const sent = message.channel.send('Creating heap dump...');
+          await createHeapSnapshot();
+          sent.then(m => m.edit('Done!'));
+          break;
+        case 'reload':
+          const sent1 = message.channel.send('Sto ricaricando i comandi...'), date1 = Date.now(), commands = await message.client.loadCommands();
+          const date2 = Date.now();
+          sent1.then(m => m.edit(`Fatto! Ho impiegato **${date2 - date1}ms**. Controlla la console per tutti i comandi.`));
+          console.log(commands);
           break;
         default:
           message.client.commands.get('eval').execute(message, args, message.client, prefix);

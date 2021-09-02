@@ -1,18 +1,12 @@
-const { Collection, MessageEmbed, Message } = require('discord.js');
+const { Collection, MessageEmbed } = require('discord.js');
 const normalize = require('normalize-strings');
 const ms = require('ms');
 const helpEmbed = require('../config/helpEmbed');
-const Command = require('../config/Command');
+const { Command } = require('../config');
 const error = require('../config/error');
 
 const command = new Command('help',
 
-  /**
-   * Mostra un messaggio con tutti i comandi!
-   * @param {Message} message - The message with the command
-   * @param {Array<String>} args - The args of this message
-   * @param {String} prefix - The prefix used in the message
-   */
   async function (message, args, prefix) {
     try {
       message.delete()

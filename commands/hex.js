@@ -1,14 +1,9 @@
-const { resolveColor, Message } = require('discord.js');
-const Command = require('../config/Command');
+const { resolveColor } = require('discord.js');
+const { Command } = require('../config');
 const error = require('../config/error');
 
 const command = new Command('hex',
 
-  /**
-   * Scopri l'hex code di un colore!
-   * @param {Message} message - The message with the command
-   * @param {Array<String>} args - The args of this message
-   */
   async function (message, args) {
     try {
       if (!args[0])

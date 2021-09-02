@@ -1,4 +1,4 @@
-const { MessageEmbed, WebhookClient } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const postStatus = require('../config/postStatus.js');
 
 /**
@@ -9,7 +9,6 @@ const postStatus = require('../config/postStatus.js');
 module.exports = (id, guilds) => {
   try {
     console.log(`Shard ${id} ready with ${!!guilds ? guilds.size : 0} guilds unavailable.`);
-    require('../config/Util.js');
     var emb = new MessageEmbed()
       .setAuthor(`Shard ${id}`)
       .setColor('GREEN')
